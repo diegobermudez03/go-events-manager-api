@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -41,20 +42,14 @@ func TestAuthHandler(t *testing.T) {
 type mockAuthSvc struct{
 }
 
-func (s *mockAuthSvc) RegisterUser(
-	fullName string,
-	age int,
-	gender string,
-	email string,
-	password string,
-) (string, error){
+func (s *mockAuthSvc) RegisterUser(ctx context.Context, age int, fullName, gender, email, password string) (string, string, error){
+	return "12345678", "", nil
+}
+
+func (s *mockAuthSvc)LoginUser(ctx context.Context, email string, password string) (string, error){
 	return "12345678", nil
 }
 
-func (s *mockAuthSvc)LoginUser(email string, password string) (string, error){
-	return "12345678", nil
-}
-
-func (s *mockAuthSvc)RefreshAccessToken(refreshToken string) (string, error){
+func (s *mockAuthSvc)RefreshAccessToken(ctx context.Context, refreshToken string) (string, error){
 	return "12345678", nil
 }

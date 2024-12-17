@@ -27,8 +27,9 @@ func (s *APIServer) Run() error {
 	router := chi.NewMux()
 	r := chi.NewMux()
 	router.Mount("/v1", r)
+
 	//create services
-	authService := app.NewAuthService()
+	authService := app.NewAuthService(s.storage.UsersRepo)
 
 	//create handlers
 	authHandler := handlers.NewAuthHandler(authService)

@@ -58,9 +58,10 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 	}
 
 	//process request
-	refreshToken, err := h.authSvc.RegisterUser(
-		payload.FullName,
+	refreshToken, accessToken, err := h.authSvc.RegisterUser(
+		r.Context(),
 		payload.Age,
+		payload.FullName,
 		payload.Gender,
 		payload.Email,
 		payload.Password,
@@ -74,6 +75,7 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 		http.StatusCreated,
 		map[string]string{
 			"refreshToken" : refreshToken,
+			"accessToken" : accessToken,
 		},
 	)
 }
