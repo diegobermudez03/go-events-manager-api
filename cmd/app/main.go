@@ -1,13 +1,16 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
 	"github.com/diegobermudez03/go-events-manager-api/internal/api"
 	"github.com/diegobermudez03/go-events-manager-api/internal/config"
+	"github.com/diegobermudez03/go-events-manager-api/internal/db"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/joho/godotenv"
 )
 
@@ -22,20 +25,31 @@ func main() {
 	config := &config.Config{
 		Port: getEnv("PORT", ":8081"),
 		DbConfig: config.DbConfig{
-			Addr: getEnv("POSTGRES_URL", ""),
+			Addr: getEnv("POSTGRES_URL", "postgres://admin:secret@localhost:5432/events_go?sslmode=disable"),
 		},
 	}
 
 	//open database
-	db, err := sql.Open("postgres", config.DbConfig.Addr)
+	db, err := db.NewDatabase(config.DbConfig.Addr)
 	if err != nil{
-		log.Fatalf("Couldn't open database %s", err.Error())
+		log.Fatalf("Unable to open database %s", err.Error())
 	}
-	if !checkDatabaseHealth(db){
-		log.Fatalf("Couldn't open database %s", err.Error())
-	}
+	defer db.Close()
 
 	storage := storage.NewPostgreStorage(db)
+
+	//MIGRATIONS
+	m, err := migrate.New(
+		"file://cmd/migrations/migrate",
+		config.DbConfig.Addr,
+	)
+	if err != nil{
+		log.Fatalf("Unable to migrate %s", err.Error())
+	}
+	if err = m.Up(); err != nil{
+		log.Fatalf("Unable to migrate %s", err.Error())
+	}
+	log.Println("Migrations up succesfully")
 
 	//create new API server
 	server := api.NewAPIServer(storage)
@@ -46,9 +60,6 @@ func main() {
 	}
 }
 
-func checkDatabaseHealth(db *sql.DB) bool{
-	return db.Ping() == nil
-}
 
 func getEnv(param string, fallback string) string{
 	if val, ok := os.LookupEnv(param); ok{
