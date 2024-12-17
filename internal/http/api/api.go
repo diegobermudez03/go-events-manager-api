@@ -29,13 +29,13 @@ func (s *APIServer) Run() error {
 	//create services
 
 	//create handlers
-	usersHandler := handlers.NewUsersHandler()
+	authHandler := handlers.NewAuthHandler()
 
 	//mount routes
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
-	usersHandler.MountRoutes(r)
+	authHandler.MountRoutes(r)
 
 	server := http.Server{
 		Handler: router,
