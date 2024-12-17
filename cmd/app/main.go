@@ -54,7 +54,7 @@ func main() {
 	defer stop()
 
 	//create new API server
-	server := api.NewAPIServer(config.Port,storage)
+	server := api.NewAPIServer(config.Port, storage, config)
 	//run the API server in a separated gorutine to be able to listen to shutdown
 	go func(){
 		log.Printf("Server running on port %s", config.Port)

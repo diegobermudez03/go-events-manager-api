@@ -1,10 +1,20 @@
 package config
 
-import "os"
+import (
+	"os"
+	"strconv"
+)
 
 type Config struct {
-	Port     string
-	DbConfig *DbConfig
+	Port     	string
+	DbConfig 	*DbConfig
+	AuthConfig 	*AuthConfig
+}
+
+type AuthConfig struct{
+	SecondsLife 			int64
+	AccessTokenExpiration 	int64
+	JWTSecret				string
 }
 
 type DbConfig struct {
@@ -18,6 +28,7 @@ func NewConfig() *Config {
 	return &Config{
 		Port:     getEnv("PORT", ":8081"),
 		DbConfig: NewDBConfig(),
+		AuthConfig: NewAuthConfig(),
 	}
 }
 
@@ -27,9 +38,29 @@ func NewDBConfig() *DbConfig {
 	}
 }
 
+func NewAuthConfig() *AuthConfig{
+	return &AuthConfig{
+		SecondsLife: getEnvAsInt("REFRESH_TOKEN_LIFE_HOURS", 1440),
+		AccessTokenExpiration: getEnvAsInt("ACCESS_TOKEN_LIFE_SECONDS", 600),
+		JWTSecret: getEnv("JWT_SECRET", "secret"),
+	}
+}
+
+
 func getEnv(param string, fallback string) string {
 	if val, ok := os.LookupEnv(param); ok {
 		return val
+	}
+	return fallback
+}
+
+func getEnvAsInt(param string, fallback int64) int64 {
+	if val, ok := os.LookupEnv(param); ok {
+		number, err := strconv.Atoi(val)
+		if err != nil{
+			return fallback
+		}
+		return int64(number)
 	}
 	return fallback
 }

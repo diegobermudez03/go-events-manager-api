@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/diegobermudez03/go-events-manager-api/internal/config"
 	"github.com/diegobermudez03/go-events-manager-api/internal/http/handlers"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/app"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
@@ -14,12 +15,14 @@ type APIServer struct {
 	address 	string
 	storage 	*storage.Storage
 	server 		*http.Server
+	config 		*config.Config
 }
 
-func NewAPIServer(address string, storage *storage.Storage) *APIServer {
+func NewAPIServer(address string, storage *storage.Storage, config *config.Config) *APIServer {
 	return &APIServer{
-		address: address,
-		storage: storage,
+		address: 	address,
+		storage: 	storage,
+		config:		config,
 	}
 }
 
@@ -29,7 +32,13 @@ func (s *APIServer) Run() error {
 	router.Mount("/v1", r)
 
 	//create services
-	authService := app.NewAuthService(s.storage.UsersRepo)
+	authService := app.NewAuthService(
+		s.storage.UsersRepo, 
+		s.storage.SessionsRepo, 
+		s.config.AuthConfig.SecondsLife, 
+		s.config.AuthConfig.AccessTokenExpiration,
+		s.config.AuthConfig.JWTSecret,
+	)
 
 	//create handlers
 	authHandler := handlers.NewAuthHandler(authService)

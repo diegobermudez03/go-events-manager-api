@@ -2,6 +2,9 @@ package domain
 
 import (
 	"context"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 /*	having all these interfaces in the same file is not a very good idea for a clean archtieecture
@@ -23,5 +26,9 @@ import (
 
 type UsersRepo interface {
 	GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error)
-	RegisterUser(ctx context.Context, auth UserAuth, user User) error 
+	RegisterUser(ctx context.Context, auth UserAuth, user User) (uuid.UUID, error) 
+}
+
+type SessionsRepo interface {
+	CreateSession(ctx context.Context, userId uuid.UUID, token string, expiresAt time.Time) error 
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
+	"github.com/google/uuid"
 )
 
 type UsersPostgres struct {
@@ -36,6 +37,6 @@ func (r *UsersPostgres) GetUserAuthByEmail(ctx context.Context, email string) (*
 	return userAuth, nil
 }
 
-func (r *UsersPostgres) RegisterUser(ctx context.Context, auth domain.UserAuth, user domain.User) error {
-	return nil
+func (r *UsersPostgres) RegisterUser(ctx context.Context, auth domain.UserAuth, user domain.User) (uuid.UUID,error) {
+	return uuid.New(), nil
 }

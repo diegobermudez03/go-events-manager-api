@@ -8,11 +8,13 @@ import (
 )
 
 type Storage struct {
-	UsersRepo domain.UsersRepo
+	UsersRepo 		domain.UsersRepo
+	SessionsRepo 	domain.SessionsRepo
 }
 
 func NewPostgreStorage(db *sql.DB) *Storage{
 	return &Storage{
 		UsersRepo: repository.NewUsersPostgres(db),
+		SessionsRepo: repository.NewSessionsPostgres(db),
 	}
 }
