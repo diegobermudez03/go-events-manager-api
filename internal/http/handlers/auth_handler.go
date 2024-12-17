@@ -15,23 +15,27 @@ type AuthHandler struct {
 	authSvc 	domain.AuthSvc
 }
 
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{}
+func NewAuthHandler(authSvc domain.AuthSvc) *AuthHandler {
+	return &AuthHandler{
+		authSvc: authSvc,
+	}
 }
 
 func (h *AuthHandler) MountRoutes(router *chi.Mux){
 	r := chi.NewRouter()
 	r.Post("/register", h.registerUser)
+
+	router.Mount("/auth", r)
 }
 
 
 //dtos for endpoints
 type registerDTO struct{
-	fullName	string 	`json:"fullName" validate:"required"`
-	age 		int 	`json:"age" validate:"required"`
-	gender 		string 	`json:"gender" validate:"required"`
-	email 		string 	`json:"email" validate:"required"`
-	password 	string 	`json:"password" validate:"required"`
+	FullName	string 	`json:"fullName" validate:"required"`
+	Age 		int 	`json:"age" validate:"required"`
+	Gender 		string 	`json:"gender" validate:"required"`
+	Email 		string 	`json:"email" validate:"required,email"`
+	Password 	string 	`json:"password" validate:"required"`
 }
 
 
@@ -55,18 +59,21 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 
 	//process request
 	refreshToken, err := h.authSvc.RegisterUser(
-		payload.fullName,
-		payload.age,
-		payload.gender,
-		payload.email,
-		payload.password,
+		payload.FullName,
+		payload.Age,
+		payload.Gender,
+		payload.Email,
+		payload.Password,
 	)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return 
 	}
-	utils.WriteJSON(w, map[string]string{
-		"refreshToken" : refreshToken,
-	})
-
+	utils.WriteJSON(
+		w, 
+		http.StatusCreated,
+		map[string]string{
+			"refreshToken" : refreshToken,
+		},
+	)
 }

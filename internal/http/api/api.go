@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/diegobermudez03/go-events-manager-api/internal/http/handlers"
+	"github.com/diegobermudez03/go-events-manager-api/pkg/app"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
 	"github.com/go-chi/chi/v5"
 )
@@ -27,9 +28,10 @@ func (s *APIServer) Run() error {
 	r := chi.NewMux()
 	router.Mount("/v1", r)
 	//create services
+	authService := app.NewAuthService()
 
 	//create handlers
-	authHandler := handlers.NewAuthHandler()
+	authHandler := handlers.NewAuthHandler(authService)
 
 	//mount routes
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

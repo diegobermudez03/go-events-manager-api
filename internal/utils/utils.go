@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -9,10 +10,14 @@ import (
 
 var Validate = validator.New(validator.WithRequiredStructEnabled())
 
-func WriteJSON(w http.ResponseWriter, payload interface{}) {
-
+func WriteJSON(w http.ResponseWriter, status int, payload interface{}) error {
+	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(payload)
 }
 
-func WriteError(w http.ResponseWriter, status int, err error){
-
+func WriteError(w http.ResponseWriter, status int, err error) error{
+	return WriteJSON(w, status, map[string]string{
+		"error" : err.Error(),
+	})
 }
