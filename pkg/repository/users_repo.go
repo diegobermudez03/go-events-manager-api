@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
-	"github.com/google/uuid"
 )
 
 type UsersPostgres struct {
@@ -18,25 +18,18 @@ func NewUsersPostgres(db *sql.DB) *UsersPostgres{
 	}
 }
 
-func (r *UsersPostgres) GetUserAuthByEmail(ctx context.Context, email string) (*domain.UserAuth, error){
-	row := r.db.QueryRowContext(
-		ctx, 
-		`SELECT id, email, created_at
-		FROM users_auth
-		WHERE email = $1
-		LIMIT 1`,
-		email,
+func (r *UsersPostgres) CreateUser(ctx context.Context, user domain.User) error{
+	result, err := r.db.ExecContext(
+		ctx,
+		`INSERT INTO users(id, full_name, birth_date, gender, created_at)
+		VALUES($1, $2, $3, $4, $5)`,
+		user.Id, user.FullName, user.BirthDate, user.Gender, user.CreatedAt,
 	)
-	userAuth := new(domain.UserAuth)
-	if err := row.Scan(&userAuth.Id, &userAuth.Email, &userAuth.CreatedAt); err != nil{
-		if err == sql.ErrNoRows{
-			return nil, domain.UserDoesntExistError 
-		}
-		return nil, err 
+	if err != nil{
+		return err 
 	}
-	return userAuth, nil
-}
-
-func (r *UsersPostgres) RegisterUser(ctx context.Context, auth domain.UserAuth, user domain.User) (uuid.UUID,error) {
-	return uuid.New(), nil
+	if num, err := result.RowsAffected(); num == 0 || err != nil{
+		return errors.New("")
+	}
+	return nil
 }

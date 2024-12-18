@@ -9,6 +9,7 @@ import (
 	"github.com/diegobermudez03/go-events-manager-api/pkg/app"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 type APIServer struct {
@@ -28,26 +29,29 @@ func NewAPIServer(address string, storage *storage.Storage, config *config.Confi
 
 func (s *APIServer) Run() error {
 	router := chi.NewMux()
+
+	//CORS, this basic CORS has no filters, accepts all domains, methods, and ages
+	router.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins:   []string{"https://*", "http://*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: false,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	  }))
+
 	r := chi.NewMux()
 	router.Mount("/v1", r)
 
-	//create services
-	authService := app.NewAuthService(
-		s.storage.UsersRepo, 
-		s.storage.SessionsRepo, 
-		s.config.AuthConfig.SecondsLife, 
-		s.config.AuthConfig.AccessTokenExpiration,
-		s.config.AuthConfig.JWTSecret,
-	)
+	//	inject dependencies and suscribe routes
+	s.injectDependencies(r)
 
-	//create handlers
-	authHandler := handlers.NewAuthHandler(authService)
-
-	//mount routes
+	//	health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
 	})
-	authHandler.MountRoutes(r)
 
 	server := http.Server{
 		Handler: router,
@@ -59,4 +63,23 @@ func (s *APIServer) Run() error {
 
 func (s *APIServer) Shutdown() error {
 	return s.server.Shutdown(context.TODO())
+}
+
+
+func (s *APIServer) injectDependencies(router *chi.Mux){
+	//create services
+	authService := app.NewAuthService(
+		s.storage.AuthRepo,
+		s.storage.UsersRepo, 
+		s.storage.SessionsRepo, 
+		s.config.AuthConfig.SecondsLife, 
+		s.config.AuthConfig.AccessTokenExpiration,
+		s.config.AuthConfig.JWTSecret,
+	)
+
+	//create handlers
+	authHandler := handlers.NewAuthHandler(authService)
+
+	//mount routes
+	authHandler.MountRoutes(router)
 }

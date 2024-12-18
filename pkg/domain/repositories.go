@@ -24,9 +24,13 @@ import (
 			custom_errors.go
 */
 
-type UsersRepo interface {
+type AuthRepo interface {
 	GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error)
-	RegisterUser(ctx context.Context, auth UserAuth, user User) (uuid.UUID, error) 
+	RegisterUser(ctx context.Context, user UserAuth) error
+}
+
+type UsersRepo interface{
+	CreateUser(ctx context.Context, user User) error
 }
 
 type SessionsRepo interface {

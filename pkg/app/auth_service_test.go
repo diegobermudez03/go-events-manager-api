@@ -3,18 +3,18 @@ package app
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
-	"github.com/google/uuid"
+	"github.com/diegobermudez03/go-events-manager-api/pkg/mock"
 )
 
 func TestAuthService(t *testing.T) {
 
-	userMock := UserRepoMock{}
-	sessionmock := SessionRepoMock{}
+	authRepo := mock.AuthRepoMock{}
+	usersRepo := mock.UsersRepoMock{}
+	sessionmock := mock.SessionRepoMock{}
 
-	service := NewAuthService(&userMock, &sessionmock, 1440, 600, "secret")
+	service := NewAuthService(&authRepo,&usersRepo, &sessionmock, 1440, 600, "secret")
 
 	t.Run("should receive both tokens", func(t *testing.T) {
 		rToken, aToken, err := service.RegisterUser(
@@ -45,26 +45,8 @@ func TestAuthService(t *testing.T) {
 			"d1@gmail.com",
 			"actuacion.1",
 		)
-		if err != domain.UserWithEmailAlreadyExists{
+		if err != domain.ErrUserWithEmailAlreadyExists{
 			t.Error("Expected user already exists but got nothing")
 		}
 	})
-}
-
-type UserRepoMock struct{}
-func (u * UserRepoMock) GetUserAuthByEmail(ctx context.Context, email string) (*domain.UserAuth, error){
-	if email == "d1@gmail.com"{
-		return &domain.UserAuth{}, nil
-	}
-	return nil, domain.UserWithEmailAlreadyExists
-}
-func (u * UserRepoMock) RegisterUser(ctx context.Context, auth domain.UserAuth, user domain.User) (uuid.UUID, error) {
-	return uuid.New(), nil
-}
-
-
-type SessionRepoMock struct{}
-
-func (s SessionRepoMock) CreateSession(ctx context.Context, userId uuid.UUID, token string, expiresAt time.Time) error {
-	return nil
 }

@@ -3,7 +3,8 @@ package domain
 import "errors"
 
 var (
-	UserDoesntExistError = errors.New("the user doesn't exist")
-	UserWithEmailAlreadyExists = errors.New("the email is already in use")
-	InvalidParametersError = errors.New("Invalid parameter")
+	ErrUserDoesntExist = errors.New("the user doesn't exist")
+	ErrUserWithEmailAlreadyExists = errors.New("the email is already in use")
+	ErrInvalidParametersError = errors.New("invalid parameter")
+	ErrInternal	= errors.New("internal error processing request")
 )
