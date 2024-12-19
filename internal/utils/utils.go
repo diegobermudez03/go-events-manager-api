@@ -17,7 +17,10 @@ func WriteJSON(w http.ResponseWriter, status int, payload interface{}) error {
 }
 
 func WriteError(w http.ResponseWriter, status int, err error) error{
-	return WriteJSON(w, status, map[string]string{
+	return WriteJSON(
+		w, 
+		status,
+		map[string]string{
 		"error" : err.Error(),
 	})
 }

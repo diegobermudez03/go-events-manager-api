@@ -21,13 +21,14 @@ func NewAuthHandler(authSvc domain.AuthSvc) *AuthHandler {
 func (h *AuthHandler) MountRoutes(router *chi.Mux){
 	r := chi.NewRouter()
 	r.Post("/register", h.registerUser)
-	r.Get("/login", h.LoginUser)
+	r.Get("/login", h.loginUser)
+	r.Get("/refresh", h.refreshSession)
 
 	router.Mount("/auth", r)
 }
 
 
-//dtos for endpoints
+/////////		REQUESTS DTOS 
 type registerDTO struct{
 	FullName	string 	`json:"fullName" validate:"required"`
 	Age 		int 	`json:"age" validate:"required"`
@@ -41,18 +42,29 @@ type loginDTO struct{
 	Password 	string `json:"passord" validate:"required"`
 }
 
+type refreshDTO struct{
+	RefreshToken 	string 	`json:"refreshToken" validate:"required"`
+}
+
+/////////		RESPONSES DTOS 
 type loginResponseDTO struct{
 	RefreshToken	string	`json:"refreshToken"`
 	AccessToken 	string 	`json:"accessToken"`
 }
 
+type refreshResponseDTO struct{
+	AccessToken	string 	`json:"accessToken"`
+}
 
+/////////////////////////////////////////////////////////////////////////
+/////////////////////		HANDLERS		////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
 func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 	var payload registerDTO
 	err := validateBody(r, &payload)
 	if err != nil{
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, domainErrorToHttp(err), err)
 		return
 	}
 
@@ -66,7 +78,7 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 		payload.Password,
 	)
 	if err != nil{
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, domainErrorToHttp(err), err)
 		return 
 	}
 	utils.WriteJSON(
@@ -79,16 +91,16 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 	)
 }
 
-func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request){
+func (h *AuthHandler) loginUser(w http.ResponseWriter, r *http.Request){
 	var payload loginDTO
 	err := validateBody(r, &payload)
 	if err != nil{
-		utils.WriteError(w, http.StatusBadRequest, err)
+		utils.WriteError(w, domainErrorToHttp(err), err)
 		return 
 	}
 	refreshToken, accessToken, err := h.authSvc.LoginUser(r.Context(), payload.Email, payload.Password)
 	if err != nil{
-		utils.WriteError(w, http.StatusInternalServerError, err)
+		utils.WriteError(w, domainErrorToHttp(err), err)
 		return 
 	}
 	utils.WriteJSON(
@@ -99,6 +111,25 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request){
 			AccessToken: accessToken,
 		},
 	)
+}
 
-	
+func (h *AuthHandler) refreshSession(w http.ResponseWriter, r *http.Request){
+	var payload refreshDTO
+	if err := validateBody(r, &payload); err != nil{
+		utils.WriteError(w, domainErrorToHttp(err), err)
+		return
+	}
+	accessToken, err:= h.authSvc.RefreshAccessToken(r.Context(), payload.RefreshToken)
+
+	if err != nil{
+		utils.WriteError(w, domainErrorToHttp(err), err)
+		return 
+	}
+	utils.WriteJSON(
+		w, 
+		http.StatusCreated,
+		refreshResponseDTO{
+			AccessToken: accessToken,
+		},
+	)
 }

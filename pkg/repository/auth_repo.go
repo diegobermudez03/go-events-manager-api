@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
+	"github.com/google/uuid"
 )
 
 type AuthPostgres struct {
@@ -36,6 +37,10 @@ func (r *AuthPostgres) GetUserAuthByEmail(ctx context.Context, email string) (*d
 		return nil, domain.ErrInternal 
 	}
 	return userAuth, nil
+}
+
+func (r *AuthPostgres) GetUserAuthById(ctx context.Context, id uuid.UUID) (*domain.UserAuth, error){
+	return nil, nil
 }
 
 func (r *AuthPostgres) RegisterUser(ctx context.Context, auth domain.UserAuth) error {

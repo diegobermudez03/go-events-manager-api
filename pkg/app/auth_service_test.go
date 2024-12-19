@@ -10,11 +10,11 @@ import (
 
 func TestAuthService(t *testing.T) {
 
-	authRepo := mock.AuthRepoMock{}
-	usersRepo := mock.UsersRepoMock{}
-	sessionmock := mock.SessionRepoMock{}
+	authMock := mock.AuthRepoMock{}
+	usersMock := mock.UsersRepoMock{}
+	sessionMock := mock.SessionRepoMock{}
 
-	service := NewAuthService(&authRepo,&usersRepo, &sessionmock, 1440, 600, "secret")
+	service := NewAuthService(&authMock, &usersMock, &sessionMock, 1440, 600, "secret")
 
 	t.Run("should receive both tokens", func(t *testing.T) {
 		rToken, aToken, err := service.RegisterUser(

@@ -15,6 +15,11 @@ func (u *AuthRepoMock) GetUserAuthByEmail(ctx context.Context, email string) (*d
 	}
 	return nil, domain.ErrUserWithEmailAlreadyExists
 }
+
+func (u *AuthRepoMock) GetUserAuthById(ctx context.Context, id uuid.UUID) (*domain.UserAuth, error) {
+	return nil, domain.ErrUserWithEmailAlreadyExists
+}
+
 func (u *AuthRepoMock) RegisterUser(ctx context.Context, auth domain.UserAuth) error {
 	return nil
 }
@@ -29,6 +34,13 @@ func (u *UsersRepoMock) CreateUser(ctx context.Context, user domain.User) error 
 //	SESSIONS REPO
 type SessionRepoMock struct{}
 
-func (s SessionRepoMock) CreateSession(ctx context.Context, session domain.Session, userId uuid.UUID) error {
+func (s SessionRepoMock) CreateSession(ctx context.Context, session domain.Session) error {
+	return nil
+}
+func (r *SessionRepoMock) GetSessionByToken(ctx context.Context, token string) (*domain.Session, error){
+	return nil, nil
+}
+
+func (r *SessionRepoMock) DeleteSessionById(ctx context.Context, sessionId uuid.UUID) error{
 	return nil
 }

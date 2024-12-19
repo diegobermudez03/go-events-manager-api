@@ -25,6 +25,7 @@ import (
 
 type AuthRepo interface {
 	GetUserAuthByEmail(ctx context.Context, email string) (*UserAuth, error)
+	GetUserAuthById(ctx context.Context, id uuid.UUID) (*UserAuth, error)
 	RegisterUser(ctx context.Context, user UserAuth) error
 }
 
@@ -33,5 +34,7 @@ type UsersRepo interface{
 }
 
 type SessionsRepo interface {
-	CreateSession(ctx context.Context, session Session, userId uuid.UUID) error 
+	CreateSession(ctx context.Context, session Session) error
+	GetSessionByToken(ctx context.Context, token string) (*Session, error)
+	DeleteSessionById(ctx context.Context, sessionId uuid.UUID) error
 }

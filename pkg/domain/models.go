@@ -41,6 +41,7 @@ type UserAuth struct {
 type Session struct{
 	Id 			uuid.UUID
 	Token 		string
-	Created_at	time.Time 
-	Expires_at 	time.Time
+	UserId		uuid.UUID
+	CreatedAt	time.Time 
+	ExpiresAt 	time.Time
 }

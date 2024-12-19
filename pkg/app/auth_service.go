@@ -134,7 +134,23 @@ func (s *AuthService) LoginUser(ctx context.Context, email string, password stri
 }
 
 func (s *AuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (string, error) {
-	return "", nil
+	session, err := s.sessionsRepo.GetSessionByToken(ctx, refreshToken)
+	if err != nil{
+		return "", err
+	}
+	if time.Now().After(session.ExpiresAt) {
+		 _ = s.sessionsRepo.DeleteSessionById(ctx, session.Id)
+		 return "", domain.ErrExpiredSession
+	}
+	user, err := s.authRepo.GetUserAuthById(ctx, session.UserId)
+	if err != nil{
+		return "", err
+	}
+	accessToken, err := s.generateAccessToken(*user)
+	if err != nil{
+		return "", err
+	}
+	return accessToken, nil
 }
 
 
@@ -152,11 +168,12 @@ func (s *AuthService) generateRefreshToken(ctx context.Context, user domain.User
 	session := domain.Session{
 		Id: uuid.New(),
 		Token: token,
-		Created_at: time.Now(),
-		Expires_at: time.Now().Add(time.Second * time.Duration(s.tokensLifeHours * 3600)),
+		UserId: user.Id,
+		CreatedAt: time.Now(),
+		ExpiresAt: time.Now().Add(time.Second * time.Duration(s.tokensLifeHours * 3600)),
 	}
 	//	create session in database
-	err = s.sessionsRepo.CreateSession(ctx, session, user.Id)
+	err = s.sessionsRepo.CreateSession(ctx, session)
 	if err != nil{
 		return "", err
 	}
