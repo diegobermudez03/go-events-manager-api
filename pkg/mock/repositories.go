@@ -2,7 +2,6 @@ package mock
 
 import (
 	"context"
-	"time"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
 	"github.com/google/uuid"
@@ -30,6 +29,6 @@ func (u *UsersRepoMock) CreateUser(ctx context.Context, user domain.User) error 
 //	SESSIONS REPO
 type SessionRepoMock struct{}
 
-func (s SessionRepoMock) CreateSession(ctx context.Context, userId uuid.UUID, token string, expiresAt time.Time) error {
+func (s SessionRepoMock) CreateSession(ctx context.Context, session domain.Session, userId uuid.UUID) error {
 	return nil
 }

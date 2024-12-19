@@ -2,7 +2,6 @@ package domain
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -34,5 +33,5 @@ type UsersRepo interface{
 }
 
 type SessionsRepo interface {
-	CreateSession(ctx context.Context, userId uuid.UUID, token string, expiresAt time.Time) error 
+	CreateSession(ctx context.Context, session Session, userId uuid.UUID) error 
 }

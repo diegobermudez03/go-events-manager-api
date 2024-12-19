@@ -17,13 +17,13 @@ import (
 const userIdKey string = "userId"
 
 type AuthService struct {
-	authRepo		domain.AuthRepo
-	usersRepo 		domain.UsersRepo
-	sessionsRepo 	domain.SessionsRepo
-	tokensLife 		int64
-	accessTokensLife int64
-	jwtSecret 		string
-	genderMap		map[string]string
+	authRepo				domain.AuthRepo
+	usersRepo 				domain.UsersRepo
+	sessionsRepo 			domain.SessionsRepo
+	tokensLifeHours	 		int64
+	accessTokensLife 		int64
+	jwtSecret 				string
+	genderMap				map[string]string
 }
 
 func NewAuthService(
@@ -48,16 +48,16 @@ func NewAuthService(
 		authRepo: authRepo,
 		usersRepo: usersRepo,
 		sessionsRepo: sessionsRepo,
-		tokensLife: tokensLife,
+		tokensLifeHours: tokensLife,
 		genderMap: genderMap,
 		accessTokensLife: accessTokensLife,
 		jwtSecret: jwtSecret,
 	}
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-///////////					PUBLIC METHODS				////////////////////////
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+////////////					PUBLIC METHODS				/////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 func (s *AuthService) RegisterUser(ctx context.Context,age int,fullName, gender,email, password string) (string, string, error) {
 	//check if user already exists
@@ -120,9 +120,9 @@ func (s *AuthService) RefreshAccessToken(ctx context.Context, refreshToken strin
 }
 
 
-/////////////////////////////////////////////////////////////////////////////////
-///////////					helpers, aux functions				/////////////////
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////
+////////////					helpers, aux functions				//////////////////
+/////////////////////////////////////////////////////////////////////////////////////
 
 func (s *AuthService) generateRefreshToken(ctx context.Context, user domain.UserAuth) (string, error){
 	randomBytes := make([]byte, 32)
@@ -131,7 +131,14 @@ func (s *AuthService) generateRefreshToken(ctx context.Context, user domain.User
 		return "", err
 	}
 	token := base64.URLEncoding.EncodeToString(randomBytes)
-	err = s.sessionsRepo.CreateSession(ctx, user.Id, token, time.Now().Add(time.Second * time.Duration(s.tokensLife)))
+	session := domain.Session{
+		Id: uuid.New(),
+		Token: token,
+		Created_at: time.Now(),
+		Expires_at: time.Now().Add(time.Second * time.Duration(s.tokensLifeHours * 3600)),
+	}
+	//	create session in database
+	err = s.sessionsRepo.CreateSession(ctx, session, user.Id)
 	if err != nil{
 		return "", err
 	}

@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"encoding/json"
-	"errors"
 	"net/http"
 
 	"github.com/diegobermudez03/go-events-manager-api/internal/utils"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
 )
 
 type AuthHandler struct {
@@ -24,6 +21,7 @@ func NewAuthHandler(authSvc domain.AuthSvc) *AuthHandler {
 func (h *AuthHandler) MountRoutes(router *chi.Mux){
 	r := chi.NewRouter()
 	r.Post("/register", h.registerUser)
+	r.Get("/login", h.LoginUser)
 
 	router.Mount("/auth", r)
 }
@@ -38,22 +36,17 @@ type registerDTO struct{
 	Password 	string 	`json:"password" validate:"required"`
 }
 
+type loginDTO struct{
+	Email		string `json:"email" validate:"required"`
+	Password 	string `json:"passord" validate:"required"`
+}
+
 
 func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
-	if r.Body == nil{
-		utils.WriteError(w, http.StatusBadRequest, errors.New("No body"))
-		return 
-	}
-
-	//validate body
 	var payload registerDTO
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil{
-		utils.WriteError(w, http.StatusBadRequest, errors.New("Invalid body"))
-		return 
-	}
-	if err := utils.Validate.Struct(payload); err != nil{
-		validationErrors := err.(validator.ValidationErrors)
-		utils.WriteError(w, http.StatusBadRequest, validationErrors)
+	err := validateBody(r, &payload)
+	if err != nil{
+		utils.WriteError(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -78,4 +71,14 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 			"accessToken" : accessToken,
 		},
 	)
+}
+
+func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request){
+	var payload loginDTO
+	err := validateBody(r, &payload)
+	if err != nil{
+		utils.WriteError(w, http.StatusBadRequest, err)
+		return 
+	}
+	
 }

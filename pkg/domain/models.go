@@ -37,3 +37,10 @@ type UserAuth struct {
 	Hash      string
 	CreatedAt time.Time
 }
+
+type Session struct{
+	Id 			uuid.UUID
+	Token 		string
+	Created_at	time.Time 
+	Expires_at 	time.Time
+}
