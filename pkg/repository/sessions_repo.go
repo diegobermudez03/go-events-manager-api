@@ -28,10 +28,10 @@ func (r *SessionsPotsgres) CreateSession(ctx context.Context, session domain.Ses
 	)
 	if err != nil{
 		log.Println(err.Error())
-		return err 
+		return domain.ErrInternal 
 	}
 	if num, err := result.RowsAffected(); num == 0 || err != nil{
-		return err
+		return domain.ErrInternal
 	}
 	return nil
 }

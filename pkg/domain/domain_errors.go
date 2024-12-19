@@ -7,4 +7,5 @@ var (
 	ErrUserWithEmailAlreadyExists = errors.New("the email is already in use")
 	ErrInvalidParametersError = errors.New("invalid parameter")
 	ErrInternal	= errors.New("internal error processing request")
+	ErrIncorrectPassword = errors.New("incorrect password")
 )

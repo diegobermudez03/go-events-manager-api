@@ -12,6 +12,7 @@ import (
 	"github.com/diegobermudez03/go-events-manager-api/pkg/helpers"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const userIdKey string = "userId"
@@ -92,10 +93,10 @@ func (s *AuthService) RegisterUser(ctx context.Context,age int,fullName, gender,
 		CreatedAt: time.Now(),
 	}
 	if err := s.authRepo.RegisterUser(ctx, userAuth); err != nil{
-		return "", "", domain.ErrInternal 
+		return "", "", err
 	}
 	if err := s.usersRepo.CreateUser(ctx, user); err != nil {
-		return "", "", domain.ErrInternal 
+		return "", "", err
 	}
 
 	//creating refresh and access token
@@ -111,8 +112,25 @@ func (s *AuthService) RegisterUser(ctx context.Context,age int,fullName, gender,
 }
 
 
-func (s *AuthService) LoginUser(ctx context.Context, email string, password string) (string, error) {
-	return "", nil
+func (s *AuthService) LoginUser(ctx context.Context, email string, password string) (string, string, error) {
+	user, err := s.authRepo.GetUserAuthByEmail(ctx, email)
+	if err != nil{
+		return "", "", err
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Hash) ,[]byte(password)); err != nil{
+		return "", "", domain.ErrIncorrectPassword
+	}
+	
+	//	if correct was correct, then we generate tokens
+	refreshToken, err := s.generateRefreshToken(ctx, *user)
+	if err != nil{
+		return "", "", domain.ErrInternal
+	}
+	accessToken, err := s.generateRefreshToken(ctx, *user)
+	if err != nil{
+		return "", "", domain.ErrInternal
+	}
+	return refreshToken, accessToken, nil
 }
 
 func (s *AuthService) RefreshAccessToken(ctx context.Context, refreshToken string) (string, error) {

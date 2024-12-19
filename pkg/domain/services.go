@@ -22,7 +22,7 @@ import "context"
 
 type AuthSvc interface {
 	RegisterUser(ctx context.Context,age int, fullName, gender, email, password string) (string, string, error)
-	LoginUser(ctx context.Context, email string, password string) (string, error)
+	LoginUser(ctx context.Context, email string, password string) (string, string, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (string, error)
 }
 

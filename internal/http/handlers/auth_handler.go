@@ -41,6 +41,12 @@ type loginDTO struct{
 	Password 	string `json:"passord" validate:"required"`
 }
 
+type loginResponseDTO struct{
+	RefreshToken	string	`json:"refreshToken"`
+	AccessToken 	string 	`json:"accessToken"`
+}
+
+
 
 func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 	var payload registerDTO
@@ -66,9 +72,9 @@ func (h *AuthHandler) registerUser(w http.ResponseWriter, r *http.Request){
 	utils.WriteJSON(
 		w, 
 		http.StatusCreated,
-		map[string]string{
-			"refreshToken" : refreshToken,
-			"accessToken" : accessToken,
+		loginResponseDTO{
+			RefreshToken: refreshToken,
+			AccessToken: accessToken,
 		},
 	)
 }
@@ -80,5 +86,19 @@ func (h *AuthHandler) LoginUser(w http.ResponseWriter, r *http.Request){
 		utils.WriteError(w, http.StatusBadRequest, err)
 		return 
 	}
+	refreshToken, accessToken, err := h.authSvc.LoginUser(r.Context(), payload.Email, payload.Password)
+	if err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return 
+	}
+	utils.WriteJSON(
+		w,
+		http.StatusAccepted,
+		loginResponseDTO{
+			RefreshToken: refreshToken,
+			AccessToken: accessToken,
+		},
+	)
+
 	
 }

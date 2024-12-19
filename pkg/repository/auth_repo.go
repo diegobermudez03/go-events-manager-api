@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
@@ -34,7 +33,7 @@ func (r *AuthPostgres) GetUserAuthByEmail(ctx context.Context, email string) (*d
 			return nil, domain.ErrUserDoesntExist
 		}
 		log.Printf("Auth repo error %s", err.Error())
-		return nil, err 
+		return nil, domain.ErrInternal 
 	}
 	return userAuth, nil
 }
@@ -48,11 +47,11 @@ func (r *AuthPostgres) RegisterUser(ctx context.Context, auth domain.UserAuth) e
 	)
 	if err != nil{
 		log.Printf("Auth repo error %s", err.Error())
-		return err 
+		return domain.ErrInternal 
 	}
 	if number, err := result.RowsAffected(); number == 0 || err != nil{
 		log.Printf("Auth repo error %s", err.Error())
-		return errors.New("")
+		return domain.ErrInternal
 	}
 	return  nil
 }

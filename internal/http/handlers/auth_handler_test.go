@@ -46,8 +46,8 @@ func (s *mockAuthSvc) RegisterUser(ctx context.Context, age int, fullName, gende
 	return "12345678", "", nil
 }
 
-func (s *mockAuthSvc)LoginUser(ctx context.Context, email string, password string) (string, error){
-	return "12345678", nil
+func (s *mockAuthSvc)LoginUser(ctx context.Context, email string, password string) (string, string, error){
+	return "12345678", "", nil
 }
 
 func (s *mockAuthSvc)RefreshAccessToken(ctx context.Context, refreshToken string) (string, error){
