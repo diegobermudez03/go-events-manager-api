@@ -37,9 +37,31 @@ func (r *SessionsPotsgres) CreateSession(ctx context.Context, session domain.Ses
 }
 
 func (r *SessionsPotsgres) GetSessionByToken(ctx context.Context, token string) (*domain.Session, error){
-	return nil, nil
+	row := r.db.QueryRowContext(
+		ctx,
+		`SELECT id, refresh_token, created_at, expires_at, user_id
+		FROM sessions WHERE refresh_token = $1`,
+		token,
+	)
+	session := new(domain.Session)
+	err := row.Scan(&session.Id, &session.Token, &session.CreatedAt, &session.ExpiresAt, &session.UserId)
+	if err != nil{
+		return nil ,domain.ErrInternal
+	}
+	return session, nil
 }
 
 func (r *SessionsPotsgres) DeleteSessionById(ctx context.Context, sessionId uuid.UUID) error{
+	result, err := r.db.ExecContext(
+		ctx,
+		`DELETE FROM sessions WHERE id = $1`,
+		sessionId,
+	)
+	if err != nil{
+		return domain.ErrInternal
+	}
+	if num, err := result.RowsAffected(); num == 0 || err != nil{
+		return domain.ErrInternal
+	}
 	return nil
 }
