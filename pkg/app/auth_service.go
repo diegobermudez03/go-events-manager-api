@@ -15,8 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const userIdKey string = "userId"
-
 type AuthService struct {
 	authRepo				domain.AuthRepo
 	usersRepo 				domain.UsersRepo
@@ -182,10 +180,13 @@ func (s *AuthService) generateRefreshToken(ctx context.Context, user domain.User
 
 //this function doesn't validate refresh token, that must be handled outside
 func (s *AuthService) generateAccessToken(user domain.UserAuth) (string, error){
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		userIdKey : user.Id,
-		"exp" : time.Now().Add(time.Duration(s.accessTokensLife*int64(time.Second))).Unix(),
-	})
+	customClaims := domain.CustomJWTClaims{
+		UserId: user.Id,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(s.accessTokensLife*int64(time.Second)))),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, customClaims)
 	tokenString, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil{
 		return "", err 

@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS events;
+DROP TABLE IF EXISTS participants;
+DROP TABLE IF EXISTS invitations;
+DROP TABLE IF EXISTS chat_messages;

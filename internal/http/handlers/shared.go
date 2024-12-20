@@ -14,6 +14,7 @@ var (
 	ErrInavlidBody = errors.New("invalid body")
 )
 
+
 func validateBody(r *http.Request, payload interface{}) error{
 	if r.Body == nil{
 		return ErrNoBody
