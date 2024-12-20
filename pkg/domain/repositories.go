@@ -42,3 +42,13 @@ type SessionsRepo interface {
 type RolesRepo interface{
 	CreateRoleIfNotExists(ctx context.Context, role Role) error
 }
+
+type EventsRepo interface{
+	CreateEvent(ctx context.Context, event Event) error
+}
+
+type FilesRepo interface{
+	// GROUP IS IN CASE WE HAVE AN IMPLEMENTATION LIKE S3 or MINIO, IT WOULD REPRESENT THE BUCKET
+	StoreImage(ctx context.Context, image *[]byte, group string, imageName string, imageType string, path string) (string, error)
+	DeleteFile(ctx context.Context, group string,url string) error
+}

@@ -12,13 +12,17 @@ type Storage struct {
 	AuthRepo 		domain.AuthRepo
 	SessionsRepo 	domain.SessionsRepo
 	RolesRepo		domain.RolesRepo
+	EventsRepo 		domain.EventsRepo
+	FilesRepo 		domain.FilesRepo
 }
 
-func NewPostgreStorage(db *sql.DB) *Storage{
+func NewPostgreStorage(db *sql.DB, filesRepo domain.FilesRepo) *Storage{
 	return &Storage{
 		UsersRepo: repository.NewUsersPostgres(db),
 		AuthRepo: repository.NewAuthPostgres(db),
 		SessionsRepo: repository.NewSessionsPostgres(db),
 		RolesRepo : repository.NewRolesPostgres(db),
+		EventsRepo: repository.NewEventsPostgres(db),
+		FilesRepo: filesRepo,
 	}
 }

@@ -97,7 +97,10 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 		s.config.AuthConfig.JWTSecret,
 	)
 
-	eventsService := app.NewEventsService()
+	eventsService := app.NewEventsService(
+		s.storage.EventsRepo,
+		s.storage.FilesRepo,
+	)
 
 	//create handlers
 	authHandler := handlers.NewAuthHandler(authService)

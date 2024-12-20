@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -25,13 +24,6 @@ import (
 			custom_errors.go
 */
 
-
-
-type CustomJWTClaims struct{
-	UserId 		uuid.UUID	`json:"userId"`
-	jwt.RegisteredClaims
-}
-
 type AuthSvc interface {
 	RegisterUser(ctx context.Context,age int, fullName, gender, email, password string) (string, string, error)
 	LoginUser(ctx context.Context, email string, password string) (string, string, error)
@@ -44,6 +36,13 @@ type UserSvc interface {
 type EventsSvc interface{
 	CreateEvent(ctx context.Context, event CreateEventRequest, profilePic *[]byte, creatorId uuid.UUID) error 
 }
+
+type InitializeSvc interface {
+	RegisterRoles() error 
+}
+
+// REQUEST TYPES 
+
 //	EventsSvc requests
 type CreateEventRequest struct{
 	Name 		string 
@@ -51,8 +50,4 @@ type CreateEventRequest struct{
 	StartsAt 	time.Time
 	EndsAt		time.Time
 	Address 	string 
-}
-
-type InitializeSvc interface {
-	RegisterRoles() error 
 }

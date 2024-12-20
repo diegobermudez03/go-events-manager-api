@@ -10,6 +10,7 @@ import (
 	"github.com/diegobermudez03/go-events-manager-api/internal/config"
 	"github.com/diegobermudez03/go-events-manager-api/internal/db"
 	"github.com/diegobermudez03/go-events-manager-api/internal/http/api"
+	"github.com/diegobermudez03/go-events-manager-api/pkg/repository"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -23,20 +24,23 @@ import (
 //shouldnt have to deal with errors with those services, it receives the already opened services, as done with Storage
 
 func main() {
-	//load env variables and configuration
+	// 	LOAD ENV VARIABLES
 	godotenv.Load(".env")
 	config := config.NewConfig()
 
-	//open database
+	//	OPEN FILE STORAGE SYSTEM
+	filesRepo := repository.NewFilesInServer()
+
+	//	OPEN DATABASE
 	db, err := db.NewDatabase(config.DbConfig.Addr)
 	if err != nil{
 		log.Fatalf("Unable to open database %s", err.Error())
 	}
 	defer db.Close()
 
-	storage := storage.NewPostgreStorage(db)
+	storage := storage.NewPostgreStorage(db, filesRepo)
 
-	//MIGRATIONS
+	//	MIGRATIONS
 	m, err := migrate.New(
 		"file://db/migrations",
 		config.DbConfig.Addr,
@@ -49,11 +53,11 @@ func main() {
 	}
 	log.Println("Migrations up succesfully")
 
-	//for graceful shutdown, listen to os signals
+	//	GRACEFUL SHITDOWN
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	//create new API server
+	//	API SERVER
 	server := api.NewAPIServer(config.Port, storage, config)
 	//run the API server in a separated gorutine to be able to listen to shutdown
 	go func(){

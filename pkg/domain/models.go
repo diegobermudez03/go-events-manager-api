@@ -3,6 +3,7 @@ package domain
 import (
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -22,6 +23,11 @@ import (
 		shared/
 			custom_errors.go
 */
+
+type CustomJWTClaims struct{
+	UserId 		uuid.UUID	`json:"userId"`
+	jwt.RegisteredClaims
+}
 
 type User struct {
 	Id        uuid.UUID `json:"id"`
@@ -51,3 +57,16 @@ type Role struct{
 	Name 		string 
 	Permissions []string
 }
+
+type Event struct{
+	Id 				uuid.UUID
+	Name 			string 
+	Description 	string
+	StartsAt		time.Time 
+	EndsAt 			time.Time 
+	ProfilePicUrl 	string 
+	Address 		string 
+	CreatedAt 		time.Time 
+}
+
+const EventsGroup = "events"
