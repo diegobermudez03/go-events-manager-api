@@ -73,3 +73,18 @@ func (s *EventsService) CreateEvent(ctx context.Context, eventRequest domain.Cre
 	}
 	return nil
 }
+
+func (s *EventsService) GetParticipationsOfUser(ctx context.Context, userId uuid.UUID, filters ...domain.ParticipationFilter) ([]domain.Participation, error){
+	filter := domain.ParticipationFilters{}
+	for _, f := range filters{
+		f(&filter)
+	}
+	//explicetely adding userID filter
+	domain.ParticipationUserIdFilter(&userId)
+
+	participations, err := s.eventsRepo.GetParticipations(ctx, filter)
+	if err != nil{
+		return nil, err 
+	}
+	return participations, nil
+}

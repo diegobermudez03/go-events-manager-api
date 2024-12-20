@@ -50,3 +50,7 @@ func (r *EventsPostgres) CreateParticipant(ctx context.Context, userId uuid.UUID
 	}
 	return nil
 }
+
+func (r *EventsPostgres) GetParticipations(ctx context.Context, filters domain.ParticipationFilters) ([]domain.Participation, error){
+	return nil, nil
+}

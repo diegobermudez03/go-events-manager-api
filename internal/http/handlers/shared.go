@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/diegobermudez03/go-events-manager-api/internal/utils"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
@@ -42,4 +43,19 @@ func domainErrorToHttp(err error) int{
 	case domain.ErrInternal.Error(): return http.StatusInternalServerError
 	}
 	return http.StatusInternalServerError
+}
+
+
+func getIntQueryParam(key string, r *http.Request) (*int){
+	if val := r.URL.Query().Get(key); val != ""{
+		num, err := strconv.Atoi(val)
+		if err != nil{
+			return nil 
+		}else{
+			p := new(int)
+			*p = num
+			return p
+		}
+	}
+	return nil
 }

@@ -31,6 +31,7 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 	r := chi.NewRouter()
 	r.Use(h.middlewares.AuthMiddleware)
 	r.Post("/", h.CreateEventHandler)
+	r.Get("/", h.GetEventsFromUser)
 
 	router.Mount("/events", r)
 }
@@ -39,12 +40,25 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 const eventProfileImage = "eventProfile"
 const eventBody = "eventBody"
 
+const eventOffsetQuery = "offset"
+const eventLimitQuery = "limit"
+const eventRoleQuery = "role"
+
 type createEventDTO struct{
 	Name 	 	string		`json:"name" validate:"required"`
 	Description string		`json:"description" validate:"required"`
 	StartsAt 	time.Time 	`json:"startsAt" validate:"required"`
 	EndsAt 		time.Time 	`json:"endsAt" validate:"required"`
 	Address 	string 		`json:"address" validate:"required"`
+}
+
+//////////	RESPONSE DTOS
+type eventTileDTO struct{
+	Id 				uuid.UUID	`json:"id"`
+	Name 			string		`json:"name"`
+	Description 	string 		`json:"description"`
+	StartsAt		time.Time	`json:"startsAt"`
+	RoleName 		string 		`json:"roleName"`
 }
 
 
@@ -116,5 +130,44 @@ func (h *EventsHandler) CreateEventHandler(w http.ResponseWriter, r *http.Reques
 		return 
 	}
 	utils.WriteJSON(w, http.StatusCreated, nil)
+}
 
+func (h *EventsHandler) GetEventsFromUser(w http.ResponseWriter, r *http.Request){
+	userId, ok := r.Context().Value(middlewares.UserIdKey).(uuid.UUID)
+	if !ok{
+		utils.WriteError(w, http.StatusBadRequest, ErrInavlidBody)
+		return 
+	}
+	//Getting query params
+	limit := getIntQueryParam(eventLimitQuery, r)
+	offset := getIntQueryParam(eventOffsetQuery, r)
+	roleAux := r.URL.Query().Get(eventRoleQuery)
+	role := new(string)
+	if roleAux != ""{
+		*role = roleAux
+	}else{
+		role = nil
+	}
+
+	//call service
+	participations, err := h.eventsService.GetParticipationsOfUser(
+		r.Context(),
+		userId,
+		domain.ParticipationRoleFilter(role),
+		domain.ParticipationOffsetFilter(offset),
+		domain.ParticipationLimitFilter(limit),
+	)
+	if err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return 
+	}
+	eventDTOs := make([]eventTileDTO, len(participations))
+	for index, ev := range participations{
+		eventDTOs[index].Id = ev.Event.Id
+		eventDTOs[index].Name = ev.Event.Name
+		eventDTOs[index].Description = ev.Event.Description
+		eventDTOs[index].StartsAt = ev.Event.StartsAt
+		eventDTOs[index].RoleName = ev.RoleName
+	}
+	utils.WriteJSON(w, http.StatusOK, eventDTOs)
 }

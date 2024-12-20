@@ -69,4 +69,11 @@ type Event struct{
 	CreatedAt 		time.Time 
 }
 
+type Participation struct{
+	Id 			uuid.UUID
+	Event		*Event
+	RoleName 	string 
+	User 		*User 		
+}
+
 const EventsGroup = "events"

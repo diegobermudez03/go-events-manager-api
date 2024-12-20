@@ -35,6 +35,7 @@ type UserSvc interface {
 
 type EventsSvc interface{
 	CreateEvent(ctx context.Context, event CreateEventRequest, profilePic *[]byte, creatorId uuid.UUID) error 
+	GetParticipationsOfUser(ctx context.Context, userId uuid.UUID, filters ...ParticipationFilter) ([]Participation, error)
 }
 
 type InitializeSvc interface {

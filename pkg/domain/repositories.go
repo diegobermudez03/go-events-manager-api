@@ -48,6 +48,7 @@ type RolesRepo interface{
 type EventsRepo interface{
 	CreateEvent(ctx context.Context, event Event) error
 	CreateParticipant(ctx context.Context, userId uuid.UUID, eventId uuid.UUID, roleId uuid.UUID) error
+	GetParticipations(ctx context.Context, filters ParticipationFilters) ([]Participation, error)
 }
 
 type FilesRepo interface{
