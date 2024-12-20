@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/diegobermudez03/go-events-manager-api/internal/config"
 	"github.com/diegobermudez03/go-events-manager-api/internal/http/handlers"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/app"
+	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
 	"github.com/diegobermudez03/go-events-manager-api/pkg/storage"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -46,7 +48,10 @@ func (s *APIServer) Run() error {
 	router.Mount("/v1", r)
 
 	//	inject dependencies and suscribe routes
-	s.injectDependencies(r)
+	initializer := s.injectDependencies(r)
+	if err := initializer.RegisterRoles(); err != nil{
+		return fmt.Errorf("Unable to initialize app %s", err.Error())
+	}
 
 	//	health check
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
@@ -66,7 +71,7 @@ func (s *APIServer) Shutdown() error {
 }
 
 
-func (s *APIServer) injectDependencies(router *chi.Mux){
+func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 	//create services
 	authService := app.NewAuthService(
 		s.storage.AuthRepo,
@@ -82,4 +87,6 @@ func (s *APIServer) injectDependencies(router *chi.Mux){
 
 	//mount routes
 	authHandler.MountRoutes(router)
+
+	return app.NewInitializeService(s.storage.RolesRepo)
 }

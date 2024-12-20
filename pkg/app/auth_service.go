@@ -34,7 +34,7 @@ func NewAuthService(
 	tokensLife 		int64, 
 	accessTokensLife int64,
 	jwtSecret 		string,
-) *AuthService {
+) domain.AuthSvc {
 	genderMap := map[string]string{
 		"male" : "MALE",
 		"female" : "FEMALE",

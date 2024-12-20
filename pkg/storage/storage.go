@@ -11,6 +11,7 @@ type Storage struct {
 	UsersRepo 		domain.UsersRepo
 	AuthRepo 		domain.AuthRepo
 	SessionsRepo 	domain.SessionsRepo
+	RolesRepo		domain.RolesRepo
 }
 
 func NewPostgreStorage(db *sql.DB) *Storage{
@@ -18,5 +19,6 @@ func NewPostgreStorage(db *sql.DB) *Storage{
 		UsersRepo: repository.NewUsersPostgres(db),
 		AuthRepo: repository.NewAuthPostgres(db),
 		SessionsRepo: repository.NewSessionsPostgres(db),
+		RolesRepo : repository.NewRolesPostgres(db),
 	}
 }

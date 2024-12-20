@@ -12,7 +12,7 @@ type UsersPostgres struct {
 	db *sql.DB
 }
 
-func NewUsersPostgres(db *sql.DB) *UsersPostgres{
+func NewUsersPostgres(db *sql.DB) domain.UsersRepo{
 	return &UsersPostgres{
 		db: db,
 	}

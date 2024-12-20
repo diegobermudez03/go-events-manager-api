@@ -14,7 +14,7 @@ type AuthPostgres struct {
 	db *sql.DB
 }
 
-func NewAuthPostgres(db *sql.DB) *AuthPostgres{
+func NewAuthPostgres(db *sql.DB) domain.AuthRepo{
 	return &AuthPostgres{
 		db: db,
 	}

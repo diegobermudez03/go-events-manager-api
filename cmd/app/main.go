@@ -38,7 +38,7 @@ func main() {
 
 	//MIGRATIONS
 	m, err := migrate.New(
-		"file://cmd/migrations/migrate",
+		"file://db/migrations",
 		config.DbConfig.Addr,
 	)
 	if err != nil{

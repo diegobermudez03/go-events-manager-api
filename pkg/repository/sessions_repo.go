@@ -13,7 +13,7 @@ type SessionsPotsgres struct {
 	db *sql.DB
 }
 
-func NewSessionsPostgres(db *sql.DB) *SessionsPotsgres{
+func NewSessionsPostgres(db *sql.DB) domain.SessionsRepo{
 	return &SessionsPotsgres{
 		db: db,
 	}

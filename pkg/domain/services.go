@@ -28,3 +28,7 @@ type AuthSvc interface {
 
 type UserSvc interface {
 }
+
+type InitializeSvc interface {
+	RegisterRoles() error 
+}

@@ -45,3 +45,9 @@ type Session struct{
 	CreatedAt	time.Time 
 	ExpiresAt 	time.Time
 }
+
+type Role struct{
+	Id 			uuid.UUID
+	Name 		string 
+	Permissions []string
+}

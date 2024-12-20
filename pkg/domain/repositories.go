@@ -38,3 +38,7 @@ type SessionsRepo interface {
 	GetSessionByToken(ctx context.Context, token string) (*Session, error)
 	DeleteSessionById(ctx context.Context, sessionId uuid.UUID) error
 }
+
+type RolesRepo interface{
+	CreateRoleIfNotExists(ctx context.Context, role Role) error
+}
