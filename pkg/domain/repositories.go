@@ -41,10 +41,13 @@ type SessionsRepo interface {
 
 type RolesRepo interface{
 	CreateRoleIfNotExists(ctx context.Context, role Role) error
+	GetRoleByName(ctx context.Context, roleName string) (*Role, error)
+	GetRoleIdByName(ctx context.Context, roleName string) (uuid.UUID, error)
 }
 
 type EventsRepo interface{
 	CreateEvent(ctx context.Context, event Event) error
+	CreateParticipant(ctx context.Context, userId uuid.UUID, eventId uuid.UUID, roleId uuid.UUID) error
 }
 
 type FilesRepo interface{
