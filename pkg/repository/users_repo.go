@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
+	"github.com/google/uuid"
 )
 
 type UsersPostgres struct {
@@ -32,4 +33,8 @@ func (r *UsersPostgres) CreateUser(ctx context.Context, user domain.User) error{
 		return errors.New("")
 	}
 	return nil
+}
+
+func (r *UsersPostgres) GetUserById(ctx context.Context, userId uuid.UUID) (*domain.User, error){
+	return nil, nil
 }

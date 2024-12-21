@@ -100,6 +100,7 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 	eventsService := app.NewEventsService(
 		s.storage.EventsRepo,
 		s.storage.RolesRepo,
+		s.storage.UsersRepo,
 		s.storage.FilesRepo,
 	)
 

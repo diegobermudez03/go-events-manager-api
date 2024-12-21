@@ -31,6 +31,7 @@ type AuthRepo interface {
 
 type UsersRepo interface{
 	CreateUser(ctx context.Context, user User) error
+	GetUserById(ctx context.Context, userId uuid.UUID) (*User, error)
 }
 
 type SessionsRepo interface {
@@ -43,12 +44,14 @@ type RolesRepo interface{
 	CreateRoleIfNotExists(ctx context.Context, role Role) error
 	GetRoleByName(ctx context.Context, roleName string) (*Role, error)
 	GetRoleIdByName(ctx context.Context, roleName string) (uuid.UUID, error)
+	GetRoleById(ctx context.Context, roleId uuid.UUID) (*Role, error)
 }
 
 type EventsRepo interface{
 	CreateEvent(ctx context.Context, event Event) error
 	CreateParticipant(ctx context.Context, userId uuid.UUID, eventId uuid.UUID, roleId uuid.UUID) error
-	GetParticipations(ctx context.Context, filters ParticipationFilters) ([]Participation, error)
+	GetParticipations(ctx context.Context, filters ParticipationFilters) ([]DataModelParticipation, error)
+	GetEventById(ctx context.Context, eventId uuid.UUID)(*Event, error)
 }
 
 type FilesRepo interface{

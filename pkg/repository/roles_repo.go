@@ -117,3 +117,7 @@ func (r *RolesPostgres) GetRoleIdByName(ctx context.Context, roleName string) (u
 	}
 	return id, nil
 }
+
+func (r *RolesPostgres) GetRoleById(ctx context.Context, roleId uuid.UUID) (*domain.Role, error){
+	return nil, nil
+}
