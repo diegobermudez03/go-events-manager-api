@@ -52,5 +52,16 @@ func (r *EventsPostgres) CreateParticipant(ctx context.Context, userId uuid.UUID
 }
 
 func (r *EventsPostgres) GetParticipations(ctx context.Context, filters domain.ParticipationFilters) ([]domain.Participation, error){
+	/*r.db.QueryContext(
+		ctx, 
+		`SELECT 
+		FROM participants p
+		INNER JOIN events e on p.eventid = e.id
+		INNER JOIN users u on p.userid = u.id
+		INNER JOIN roles r on p.roleid = r.id
+		WHERE 
+		($1 IS NULL OR p.userid = $1) AND
+		($2 IS NULL OR )`
+	)*/
 	return nil, nil
 }

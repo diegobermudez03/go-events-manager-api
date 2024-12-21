@@ -47,8 +47,8 @@ const eventRoleQuery = "role"
 type createEventDTO struct{
 	Name 	 	string		`json:"name" validate:"required"`
 	Description string		`json:"description" validate:"required"`
-	StartsAt 	time.Time 	`json:"startsAt" validate:"required"`
-	EndsAt 		time.Time 	`json:"endsAt" validate:"required"`
+	StartsAt 	int64 		`json:"startsAt" validate:"required"`
+	EndsAt 		int64 		`json:"endsAt" validate:"required"`
 	Address 	string 		`json:"address" validate:"required"`
 }
 
@@ -57,7 +57,7 @@ type eventTileDTO struct{
 	Id 				uuid.UUID	`json:"id"`
 	Name 			string		`json:"name"`
 	Description 	string 		`json:"description"`
-	StartsAt		time.Time	`json:"startsAt"`
+	StartsAt		int64		`json:"startsAt"`
 	RoleName 		string 		`json:"roleName"`
 }
 
@@ -118,8 +118,8 @@ func (h *EventsHandler) CreateEventHandler(w http.ResponseWriter, r *http.Reques
 		domain.CreateEventRequest{
 			Name: eventDTO.Name,
 			Description: eventDTO.Description,
-			StartsAt:  eventDTO.StartsAt,
-			EndsAt: eventDTO.EndsAt,
+			StartsAt:  time.Time(time.Unix(eventDTO.StartsAt, 0)),
+			EndsAt:  time.Time(time.Unix(eventDTO.EndsAt, 0)),
 			Address: eventDTO.Address,
 		},
 		&bytes,
@@ -166,7 +166,7 @@ func (h *EventsHandler) GetEventsFromUser(w http.ResponseWriter, r *http.Request
 		eventDTOs[index].Id = ev.Event.Id
 		eventDTOs[index].Name = ev.Event.Name
 		eventDTOs[index].Description = ev.Event.Description
-		eventDTOs[index].StartsAt = ev.Event.StartsAt
+		eventDTOs[index].StartsAt = ev.Event.StartsAt.Unix()
 		eventDTOs[index].RoleName = ev.RoleName
 	}
 	utils.WriteJSON(w, http.StatusOK, eventDTOs)
