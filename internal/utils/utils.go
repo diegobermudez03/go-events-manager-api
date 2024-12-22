@@ -11,8 +11,8 @@ import (
 var Validate = validator.New(validator.WithRequiredStructEnabled())
 
 func WriteJSON(w http.ResponseWriter, status int, payload interface{}) error {
-	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
 	return json.NewEncoder(w).Encode(payload)
 }
 

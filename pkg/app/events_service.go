@@ -85,6 +85,12 @@ func (s *EventsService) GetParticipationsOfUser(ctx context.Context, userId uuid
 	//explicetely adding userID filter
 	domain.ParticipationUserIdFilter(&userId)
 
+	//if no limit passed, then one added
+	if filter.Limit == nil{
+		filter.Limit = new(int)
+		*filter.Limit = 100
+	}
+
 	partDataModels, err := s.eventsRepo.GetParticipations(ctx, filter)
 	if err != nil{
 		return nil, err 
@@ -123,11 +129,12 @@ func (s *EventsService) GetParticipationsOfUser(ctx context.Context, userId uuid
 		if name, ok := rolesMap[dataModel.RoleId]; ok{
 			role = name
 		}else{
-			roleEntity, err := s.rolesRepo.GetRoleById(ctx, dataModel.RoleId)
+			roleData, err := s.rolesRepo.GetRoleById(ctx, dataModel.RoleId)
 			if err != nil{
 				return nil, domain.ErrInternal
 			}
-			rolesMap[roleEntity.Id] = roleEntity.Name
+			rolesMap[roleData.Id] = roleData.Name
+			role = roleData.Name
 		}
 
 		participations[index] = domain.Participation{

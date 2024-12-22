@@ -38,6 +38,10 @@ type EventsSvc interface{
 	GetParticipationsOfUser(ctx context.Context, userId uuid.UUID, filters ...ParticipationFilter) ([]Participation, error)
 }
 
+type RolesSvc interface{
+	GetRoleById(ctx context.Context, roleId uuid.UUID)(*Role, error)
+}
+
 type InitializeSvc interface {
 	RegisterRoles() error 
 }

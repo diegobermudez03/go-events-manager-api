@@ -20,7 +20,7 @@ import (
 var partDataModels []domain.DataModelParticipation
 var users 	[]domain.User
 var events 	[]domain.Event
-var roles	[]domain.Role
+var roles	[]domain.DataModelRole
 
 func init(){
 	//users ID's
@@ -35,10 +35,10 @@ func init(){
 
 	//roles creation
 	roleId1 := uuid.New(); roleId2 := uuid.New(); roleId3 := uuid.New();
-	roles = make([]domain.Role, 3)
-	roles[0] = domain.Role{roleId1, "Creator", []string{}}
-	roles[1] = domain.Role{roleId2, "Administrator", []string{}}
-	roles[2] = domain.Role{roleId3, "Participant", []string{}}
+	roles = make([]domain.DataModelRole, 3)
+	roles[0] = domain.DataModelRole{roleId1, "Creator"}
+	roles[1] = domain.DataModelRole{roleId2, "Administrator"}
+	roles[2] = domain.DataModelRole{roleId3, "Participant"}
 
 	//events creation
 	events = make([]domain.Event, 5)
@@ -125,7 +125,7 @@ func (r *RolesRepoMock) CreatePermissionIfNotExists(ctx context.Context, permiss
 	return id, nil
 }
 
-func (r *RolesRepoMock) GetRoleByName(ctx context.Context, roleName string) (*domain.Role, error){
+func (r *RolesRepoMock) GetRoleByName(ctx context.Context, roleName string) (*domain.DataModelRole, error){
 	return nil, nil
 }
 
@@ -134,7 +134,7 @@ func (r *RolesRepoMock) GetRoleIdByName(ctx context.Context, roleName string) (u
 	return id, nil
 }
 
-func (r *RolesRepoMock) GetRoleById(ctx context.Context, roleId uuid.UUID) (*domain.Role, error){
+func (r *RolesRepoMock) GetRoleById(ctx context.Context, roleId uuid.UUID) (*domain.DataModelRole, error){
 	for _, role := range roles{
 		if roleId == role.Id{
 			return &role, nil  

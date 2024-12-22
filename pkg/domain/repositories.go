@@ -42,9 +42,9 @@ type SessionsRepo interface {
 
 type RolesRepo interface{
 	CreateRoleIfNotExists(ctx context.Context, role Role) error
-	GetRoleByName(ctx context.Context, roleName string) (*Role, error)
+	GetRoleByName(ctx context.Context, roleName string) (*DataModelRole, error)
 	GetRoleIdByName(ctx context.Context, roleName string) (uuid.UUID, error)
-	GetRoleById(ctx context.Context, roleId uuid.UUID) (*Role, error)
+	GetRoleById(ctx context.Context, roleId uuid.UUID) (*DataModelRole, error)
 }
 
 type EventsRepo interface{

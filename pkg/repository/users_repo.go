@@ -36,5 +36,16 @@ func (r *UsersPostgres) CreateUser(ctx context.Context, user domain.User) error{
 }
 
 func (r *UsersPostgres) GetUserById(ctx context.Context, userId uuid.UUID) (*domain.User, error){
-	return nil, nil
+	row := r.db.QueryRowContext(
+		ctx, 
+		`SELECT id, full_name, birth_date, gender, created_at
+		FROM users
+		WHERE id = $1`,
+		userId,
+	)
+	user := new(domain.User)
+	if err := row.Scan(&user.Id, &user.FullName, &user.BirthDate, &user.Gender, &user.CreatedAt); err != nil{
+		return nil, domain.ErrInternal
+	}
+	return user, nil
 }

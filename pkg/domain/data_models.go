@@ -8,3 +8,13 @@ type DataModelParticipation struct {
 	EventId 	uuid.UUID
 	RoleId 		uuid.UUID
 }
+
+type DataModelRole struct{
+	Id 		uuid.UUID
+	Name 	string 
+}
+
+type DataModelPermission struct{
+	Id 		uuid.UUID
+	Name 	string
+}
