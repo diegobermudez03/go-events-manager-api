@@ -84,14 +84,13 @@ func (s *APIServer) Shutdown() error {
 
 
 func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
-	// create middlewares
-	middlerares := middlewares.NewMiddlewares(s.config.AuthConfig.JWTSecret)
-
 	//create services
 	authService := app.NewAuthService(
 		s.storage.AuthRepo,
 		s.storage.UsersRepo, 
 		s.storage.SessionsRepo, 
+		s.storage.EventsRepo,
+		s.storage.RolesRepo,
 		s.config.AuthConfig.SecondsLife, 
 		s.config.AuthConfig.AccessTokenExpiration,
 		s.config.AuthConfig.JWTSecret,
@@ -102,6 +101,12 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 		s.storage.RolesRepo,
 		s.storage.UsersRepo,
 		s.storage.FilesRepo,
+	)
+
+	// create middlewares
+	middlerares := middlewares.NewMiddlewares(
+		s.config.AuthConfig.JWTSecret,
+		authService,
 	)
 
 	//create handlers

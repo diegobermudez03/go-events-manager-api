@@ -19,6 +19,8 @@ type AuthService struct {
 	authRepo				domain.AuthRepo
 	usersRepo 				domain.UsersRepo
 	sessionsRepo 			domain.SessionsRepo
+	eventsRepo 				domain.EventsRepo
+	rolesRepo 				domain.RolesRepo
 	tokensLifeHours	 		int64
 	accessTokensLife 		int64
 	jwtSecret 				string
@@ -26,12 +28,14 @@ type AuthService struct {
 }
 
 func NewAuthService(
-	authRepo 		domain.AuthRepo,
-	usersRepo 		domain.UsersRepo, 
-	sessionsRepo 	domain.SessionsRepo, 
-	tokensLife 		int64, 
-	accessTokensLife int64,
-	jwtSecret 		string,
+	authRepo 			domain.AuthRepo,
+	usersRepo 			domain.UsersRepo, 
+	sessionsRepo 		domain.SessionsRepo, 
+	eventsRepo 			domain.EventsRepo,
+	rolesRepo 			domain.RolesRepo,
+	tokensLife 			int64, 
+	accessTokensLife 	int64,
+	jwtSecret 			string,
 ) domain.AuthSvc {
 	genderMap := map[string]string{
 		"male" : "MALE",
@@ -51,6 +55,8 @@ func NewAuthService(
 		genderMap: genderMap,
 		accessTokensLife: accessTokensLife,
 		jwtSecret: jwtSecret,
+		rolesRepo: rolesRepo,
+		eventsRepo: eventsRepo,
 	}
 }
 
@@ -149,6 +155,30 @@ func (s *AuthService) RefreshAccessToken(ctx context.Context, refreshToken strin
 		return "", err
 	}
 	return accessToken, nil
+}
+
+
+func (s *AuthService) CheckAuthEvent(ctx context.Context, eventId uuid.UUID, userId uuid.UUID, neededPermissions []string) error{
+	participation, err := s.eventsRepo.GetParticipation(ctx, eventId, userId)
+	if err != nil{
+		return err 
+	}
+	permissions, err := s.rolesRepo.GetRolePermissions(ctx, participation.RoleId)
+	if err != nil{
+		return err 
+	}
+	permissionsMap := map[string]string{}
+	for _, perm := range permissions{
+		permissionsMap[perm.Name] = perm.Name
+	}
+	//check if all permissions needed are in the role
+	for _, needed := range neededPermissions{
+		if _, ok := permissionsMap[needed]; !ok{
+
+			return domain.ErrUnathorized
+		}
+	}
+	return nil
 }
 
 

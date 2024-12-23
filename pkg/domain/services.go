@@ -28,6 +28,7 @@ type AuthSvc interface {
 	RegisterUser(ctx context.Context,age int, fullName, gender, email, password string) (string, string, error)
 	LoginUser(ctx context.Context, email string, password string) (string, string, error)
 	RefreshAccessToken(ctx context.Context, refreshToken string) (string, error)
+	CheckAuthEvent(ctx context.Context, eventId uuid.UUID, userId uuid.UUID, neededPermissions []string) error
 }
 
 type UserSvc interface {
@@ -36,10 +37,12 @@ type UserSvc interface {
 type EventsSvc interface{
 	CreateEvent(ctx context.Context, event CreateEventRequest, profilePic *[]byte, creatorId uuid.UUID) error 
 	GetParticipationsOfUser(ctx context.Context, userId uuid.UUID, filters ...ParticipationFilter) ([]Participation, error)
+	GetEvent(ctx context.Context, eventId uuid.UUID)(*EventWithParticipants, error)
 }
 
 type RolesSvc interface{
 	GetRoleById(ctx context.Context, roleId uuid.UUID)(*Role, error)
+	//GetRoleFromParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) (Role, error)
 }
 
 type InitializeSvc interface {

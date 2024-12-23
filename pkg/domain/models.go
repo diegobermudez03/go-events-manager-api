@@ -30,11 +30,11 @@ type CustomJWTClaims struct{
 }
 
 type User struct {
-	Id        uuid.UUID `json:"id"`
-	FullName  string    `json:"fullName"`
-	BirthDate time.Time `json:"birthDate"`
-	Gender    string    `json:"gender"`
-	CreatedAt time.Time `json:"createdAt"`
+	Id        uuid.UUID 	`json:"id"`
+	FullName  string    	`json:"fullName"`
+	BirthDate time.Time 	`json:"birthDate"`
+	Gender    string    	`json:"gender"`
+	CreatedAt time.Time 	`json:"createdAt"`
 }
 
 type UserAuth struct {
@@ -59,14 +59,24 @@ type Role struct{
 }
 
 type Event struct{
-	Id 				uuid.UUID
-	Name 			string 
-	Description 	string
-	StartsAt		time.Time 
-	EndsAt 			time.Time 
-	ProfilePicUrl 	string 
-	Address 		string 
-	CreatedAt 		time.Time 
+	Id 				uuid.UUID		`json:"eventId"`
+	Name 			string 			`json:"name"`
+	Description 	string			`json:"description"`
+	StartsAt		time.Time 		`json:"startsAt"`
+	EndsAt 			time.Time 		`json:"endsAt"`
+	ProfilePicUrl 	string 			`json:"profilePicURL"`
+	Address 		string 			`json:"address"`
+	CreatedAt 		time.Time 		`json:"createdAt"`
+}
+
+type EventWithParticipants struct{
+	Event 
+	Participants	[]Participant 	`json:"participants"`
+}
+
+type Participant struct{
+	User 
+	Role 			string 		`json:"role"`
 }
 
 type Participation struct{

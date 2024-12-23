@@ -146,3 +146,55 @@ func (s *EventsService) GetParticipationsOfUser(ctx context.Context, userId uuid
 	}
 	return participations, nil
 }
+
+func (s *EventsService) GetEvent(ctx context.Context, eventId uuid.UUID)(*domain.EventWithParticipants, error){
+	event, err := s.eventsRepo.GetEventById(ctx, eventId)
+	if err != nil{
+		return nil, err 
+	}
+
+	partFilters := domain.ParticipationFilters{}
+
+	//adding eventId filter
+	domain.ParticipationEventIdFilter(&eventId)(&partFilters)
+
+	dataParticipations, err := s.eventsRepo.GetParticipations(ctx, partFilters)
+	if err != nil{
+		return nil, domain.ErrInternal
+	}
+
+	//get participants
+	participants := make([]domain.Participant, len(dataParticipations))
+
+	rolesCache := map[uuid.UUID]string{}
+
+	for index, part := range dataParticipations{
+		var roleName string 
+		if role, ok := rolesCache[part.RoleId]; ok{
+			roleName = role 
+		}else{
+			dtRole, err := s.rolesRepo.GetRoleById(ctx, part.RoleId)
+			if err != nil{
+				return nil, domain.ErrInternal
+			}
+			roleName = dtRole.Name
+			rolesCache[part.RoleId] = dtRole.Name
+		}
+		
+		user, err := s.usersRepo.GetUserById(ctx, part.UserId)
+		if err != nil{
+			return nil, domain.ErrInternal
+		}
+
+		participants[index] = domain.Participant{
+			User: *user,
+			Role: roleName,
+		}
+	}
+
+	eventWithParticipants := domain.EventWithParticipants{
+		Event: *event,
+		Participants: participants,
+	}
+	return &eventWithParticipants, nil
+}

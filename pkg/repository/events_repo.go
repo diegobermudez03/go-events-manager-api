@@ -98,3 +98,20 @@ func (r *EventsPostgres) GetEventById(ctx context.Context, eventId uuid.UUID) (*
 	}
 	return event, nil
 }
+
+func (r *EventsPostgres) GetParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID)(*domain.DataModelParticipation, error){
+	row := r.db.QueryRowContext(
+		ctx,
+		`SELECT id, userid, eventid, roleid
+		FROM participants
+		WHERE userid = $1 AND eventid = $2`,
+		userId, eventId,
+	)
+
+	dataModel := new(domain.DataModelParticipation)
+
+	if err := row.Scan(&dataModel.Id, &dataModel.UserId, &dataModel.EventId, &dataModel.RoleId); err != nil{
+		return nil, domain.ErrNoParticipationFound
+	}
+	return dataModel, nil
+}

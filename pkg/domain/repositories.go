@@ -45,6 +45,7 @@ type RolesRepo interface{
 	GetRoleByName(ctx context.Context, roleName string) (*DataModelRole, error)
 	GetRoleIdByName(ctx context.Context, roleName string) (uuid.UUID, error)
 	GetRoleById(ctx context.Context, roleId uuid.UUID) (*DataModelRole, error)
+	GetRolePermissions(ctx context.Context, roleId uuid.UUID) ([]DataModelPermission, error)
 }
 
 type EventsRepo interface{
@@ -52,6 +53,7 @@ type EventsRepo interface{
 	CreateParticipant(ctx context.Context, userId uuid.UUID, eventId uuid.UUID, roleId uuid.UUID) error
 	GetParticipations(ctx context.Context, filters ParticipationFilters) ([]DataModelParticipation, error)
 	GetEventById(ctx context.Context, eventId uuid.UUID)(*Event, error)
+	GetParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID)(*DataModelParticipation, error)
 }
 
 type FilesRepo interface{

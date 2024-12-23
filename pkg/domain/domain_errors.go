@@ -10,6 +10,10 @@ var (
 	ErrInternal						= errors.New("internal error processing request")
 	ErrIncorrectPassword			= errors.New("incorrect password")
 	ErrExpiredSession				= errors.New("the session has expired")
+	ErrUnathorized					= errors.New("unathorized")
+
+	//	PARTICIPATIONS ERRORS
+	ErrNoParticipationFound 		= errors.New("the user isn't a participant of the event")
 
 	//	EVENTS ERRORS
 	ErrInvalidImage 				= errors.New("invalid image file")

@@ -131,3 +131,27 @@ func (r *RolesPostgres) GetRoleById(ctx context.Context, roleId uuid.UUID) (*dom
 	}
 	return dataModel, nil
 }
+
+func (r *RolesPostgres) GetRolePermissions(ctx context.Context, roleId uuid.UUID) ([]domain.DataModelPermission, error){
+	rows, err := r.db.QueryContext(
+		ctx, 
+		`SELECT p.id, p.name
+		FROM role_permissions rp
+		INNER JOIN permissions p ON rp.permissionsid = p.id 
+		WHERE rp.rolesid = $1`,
+		roleId,
+	)
+	if err != nil{
+		return nil, domain.ErrInternal
+	}
+	permissions := []domain.DataModelPermission{}
+
+	for rows.Next(){
+		permission := domain.DataModelPermission{}
+		if err := rows.Scan(&permission.Id, &permission.Name); err != nil{
+			return nil, domain.ErrInternal
+		}
+		permissions = append(permissions, permission)
+	}
+	return permissions, nil
+}

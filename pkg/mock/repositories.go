@@ -143,6 +143,9 @@ func (r *RolesRepoMock) GetRoleById(ctx context.Context, roleId uuid.UUID) (*dom
 	return nil, errors.New("")
 }
 
+func (r *RolesRepoMock) GetRolePermissions(ctx context.Context, roleId uuid.UUID) ([]domain.DataModelPermission, error){
+	return nil, nil
+}
 
 ////////////////	EVENTS REPO
 type EventsRepoMock struct{}
@@ -166,6 +169,10 @@ func (r *EventsRepoMock) GetEventById(ctx context.Context, eventId uuid.UUID) (*
 		}
 	}
 	return nil, errors.New("")
+}
+
+func (r *EventsRepoMock) GetParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID)(*domain.DataModelParticipation, error){
+	return nil, nil
 }
 
 

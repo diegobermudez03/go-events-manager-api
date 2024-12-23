@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -32,6 +34,9 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 	r.Use(h.middlewares.AuthMiddleware)
 	r.Post("/", h.CreateEventHandler)
 	r.Get("/", h.GetEventsFromUser)
+	
+	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionEditEvent)).
+		Get(fmt.Sprintf("/{%s}", eventId), h.GetEvent)
 
 	router.Mount("/events", r)
 }
@@ -43,6 +48,8 @@ const eventBody = "eventBody"
 const eventOffsetQuery = "offset"
 const eventLimitQuery = "limit"
 const eventRoleQuery = "role"
+
+const eventId = "eventId"
 
 type createEventDTO struct{
 	Name 	 	string		`json:"name" validate:"required"`
@@ -132,6 +139,8 @@ func (h *EventsHandler) CreateEventHandler(w http.ResponseWriter, r *http.Reques
 	utils.WriteJSON(w, http.StatusCreated, nil)
 }
 
+
+
 func (h *EventsHandler) GetEventsFromUser(w http.ResponseWriter, r *http.Request){
 	userId, ok := r.Context().Value(middlewares.UserIdKey).(uuid.UUID)
 	if !ok{
@@ -170,4 +179,19 @@ func (h *EventsHandler) GetEventsFromUser(w http.ResponseWriter, r *http.Request
 		eventDTOs[index].RoleName = ev.RoleName
 	}
 	utils.WriteJSON(w, http.StatusOK, eventDTOs)
+}
+
+
+func (h *EventsHandler) GetEvent(w http.ResponseWriter, r *http.Request){
+	eventId, ok := r.Context().Value(eventId).(uuid.UUID)
+	if !ok{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+		return
+	}
+	event, err := h.eventsService.GetEvent(r.Context(), eventId)
+	if err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return 
+	}
+	utils.WriteJSON(w, http.StatusOK, event)
 }

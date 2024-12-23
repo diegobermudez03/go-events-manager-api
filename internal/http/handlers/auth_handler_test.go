@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 
@@ -52,4 +53,8 @@ func (s *mockAuthSvc)LoginUser(ctx context.Context, email string, password strin
 
 func (s *mockAuthSvc)RefreshAccessToken(ctx context.Context, refreshToken string) (string, error){
 	return "12345678", nil
+}
+
+func (s *mockAuthSvc) CheckAuthEvent(ctx context.Context, eventId uuid.UUID, userId uuid.UUID, permission []string) error{
+	return nil
 }
