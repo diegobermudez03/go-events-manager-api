@@ -15,6 +15,7 @@ func TestEventsService(t *testing.T) {
 	filesMock := mock.FilesRepoMock{}
 	authMock := mock.AuthRepoMock{}
 	emailMock := mock.EmailMock{}
+	invitationsBus := NewInvitationsEventBus()
 
 	eventsService := NewEventsService(
 		&eventsMock,
@@ -23,6 +24,7 @@ func TestEventsService(t *testing.T) {
 		&filesMock,
 		&authMock,
 		&emailMock,
+		invitationsBus,
 	)
 	t.Run("Should sucesfully retrieve the participations", func(t *testing.T) {
 		participations, err := eventsService.GetParticipationsOfUser(context.Background(), uuid.New())

@@ -84,6 +84,9 @@ func (s *APIServer) Shutdown() error {
 
 
 func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
+	//buses
+	invitatiosBus := app.NewInvitationsEventBus()
+
 	//create services
 	emailService := app.NewEmailServiceMock(
 		s.config.EmailConfig.ApiKey,
@@ -111,8 +114,9 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 		s.storage.FilesRepo,
 		s.storage.AuthRepo,
 		emailService,
+		invitatiosBus,
 	)
-
+	
 	// create middlewares
 	middlerares := middlewares.NewMiddlewares(
 		s.config.AuthConfig.JWTSecret,
@@ -121,7 +125,7 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 
 	//create handlers
 	authHandler := handlers.NewAuthHandler(authService)
-	eventsHandler := handlers.NewEventsHandler(eventsService, middlerares)
+	eventsHandler := handlers.NewEventsHandler(eventsService, invitatiosBus, middlerares)
 	usersHandler := handlers.NewUsersHandler(usersService, middlerares)
 
 	//mount routes

@@ -19,13 +19,15 @@ import (
 
 type EventsHandler struct {
 	eventsService 	domain.EventsSvc
+	invitationsBus 	domain.InvitationsEventBus
 	middlewares 	*middlewares.Middlewares
 }
 
-func NewEventsHandler(eventsService domain.EventsSvc, middlewares 	*middlewares.Middlewares) *EventsHandler {
+func NewEventsHandler(eventsService domain.EventsSvc, invitationsBus domain.InvitationsEventBus, middlewares *middlewares.Middlewares) *EventsHandler {
 	return &EventsHandler{
 		eventsService: eventsService,
 		middlewares: middlewares,
+		invitationsBus: invitationsBus,
 	}
 }
 
@@ -43,6 +45,9 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 
 	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionInvitePeople)).
 		Post(fmt.Sprintf("/{%s}/invitations", eventId), h.PostInvitation)
+
+	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionInvitePeople)).
+		Get(fmt.Sprintf("/{%s}/invitations/live", eventId), h.LiveInvitationsToEvent)
 
 	router.Mount("/events", r)
 }
@@ -265,4 +270,42 @@ func (h *EventsHandler) PostInvitation(w http.ResponseWriter, r *http.Request){
 	}
 
 	utils.WriteJSON(w, http.StatusAccepted, nil )
+}
+
+func (h *EventsHandler) LiveInvitationsToEvent(w http.ResponseWriter, r *http.Request){
+	reqEventId, ok := r.Context().Value(eventId).(uuid.UUID)
+	if !ok{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+		return 
+	}
+
+	flusher, ok := w.(http.Flusher)
+	if !ok{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("streaming unsuported"))
+		return 
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	flusher.Flush()
+
+	incomingChannel := h.invitationsBus.Suscribe(reqEventId)
+
+	loop := true
+	for loop{
+		select{
+		case event:= <- incomingChannel:
+			bytes, err := json.Marshal(event)
+			if err != nil{
+				continue 
+			}
+			jsonText := string(bytes)
+			w.Write([]byte(fmt.Sprintf("data: %s\n\n", jsonText)))
+			flusher.Flush()
+		case <-r.Context().Done():
+			h.invitationsBus.Unsuscribe(reqEventId, incomingChannel)
+			loop = false
+		}
+	}
 }

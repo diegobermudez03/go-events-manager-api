@@ -19,6 +19,7 @@ type EventsService struct{
 	filesRepo 	domain.FilesRepo
 	authRepo 	domain.AuthRepo
 	emailService domain.EmailSvc
+	invitationsBus domain.InvitationsEventBus
 }
 
 func NewEventsService(
@@ -27,7 +28,8 @@ func NewEventsService(
 	usersRepo 	domain.UsersRepo,
 	filesRepo domain.FilesRepo,
 	authRepo 	domain.AuthRepo,
-	emailService domain.EmailSvc) domain.EventsSvc{
+	emailService domain.EmailSvc,
+	invitationsBus domain.InvitationsEventBus) domain.EventsSvc{
 	return &EventsService{
 		eventsRepo: eventsRepo,
 		rolesRepo: rolesRepo,
@@ -35,6 +37,7 @@ func NewEventsService(
 		filesRepo: filesRepo,
 		authRepo: authRepo,
 		emailService: emailService,
+		invitationsBus: invitationsBus,
 	}
 }
 
@@ -254,5 +257,10 @@ func (s *EventsService) InviteUser(ctx context.Context, eventId uuid.UUID, userI
 		fmt.Sprintf("You have been invited to %s", event.Name),
 		fmt.Sprintf("You have been invited to event %s which will take place on %s at %v", event.Name, event.Address, event.StartsAt),
 	)
+
+	s.invitationsBus.Publish(eventId, domain.InvitationEvent{
+		Email: userAuth.Email,
+		Time: time.Now(),
+	})
 	return nil
 }
