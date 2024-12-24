@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"time"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
 	"github.com/google/uuid"
@@ -114,4 +116,38 @@ func (r *EventsPostgres) GetParticipation(ctx context.Context, eventId uuid.UUID
 		return nil, domain.ErrNoParticipationFound
 	}
 	return dataModel, nil
+}
+
+func (r *EventsPostgres) CreateInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) error{
+	result, err := r.db.ExecContext(
+		ctx,
+		`INSERT INTO invitations(id, userid, eventid, created_at)
+		VALUES($1, $2, $3, $4)`,
+		uuid.New(), userId, eventId, time.Now(),
+	)
+	if err != nil{
+		return domain.ErrInternal
+	}
+	if num, err := result.RowsAffected(); num == 0 || err != nil{
+		return domain.ErrInternal
+	}
+	return nil
+}
+
+func (r *EventsPostgres) CheckInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) (bool, error){
+	row := r.db.QueryRowContext(
+		ctx,
+		`SELECT id
+		FROM invitations
+		WHERE userid = $1 AND eventId = $2`,
+		userId, eventId,
+	)
+
+	var id uuid.UUID
+	if err := row.Scan(&id); errors.Is(err, sql.ErrNoRows){
+		return false, nil 
+	}else if err != nil{
+		return false, err 
+	}
+	return true, nil
 }

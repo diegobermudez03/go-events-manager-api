@@ -179,6 +179,14 @@ func (r *EventsRepoMock) GetParticipation(ctx context.Context, eventId uuid.UUID
 	return nil, nil
 }
 
+func (r *EventsRepoMock) CreateInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) error{
+	return nil
+}
+
+func (r *EventsRepoMock) CheckInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) (bool, error){
+	return true, nil
+}
+
 
 
 ////////////////	FILES REPO

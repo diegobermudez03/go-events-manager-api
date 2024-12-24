@@ -41,6 +41,9 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionAddParticipant)). 
 		Post(fmt.Sprintf("/{%s}/participants", eventId), h.PostParticipant)
 
+	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionInvitePeople)).
+		Post(fmt.Sprintf("/{%s}/invitations", eventId), h.PostInvitation)
+
 	router.Mount("/events", r)
 }
 
@@ -233,4 +236,33 @@ func (h *EventsHandler) PostParticipant(w http.ResponseWriter, r *http.Request){
 		return 
 	}
 	utils.WriteJSON(w, http.StatusCreated, nil)
+}
+
+func (h *EventsHandler) PostInvitation(w http.ResponseWriter, r *http.Request){
+	reqEventId, ok := r.Context().Value(eventId).(uuid.UUID)
+	if !ok{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+		return 
+	}
+
+	if r.Body == nil{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("no body"))
+		return 
+	}
+
+	payload := struct{
+		UserId 	uuid.UUID	`json:"userId" validate:"required"`
+	}{}
+	
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("invalid body"))
+		return 
+	}
+
+	if err := h.eventsService.InviteUser(r.Context(), reqEventId, payload.UserId); err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return 
+	}
+
+	utils.WriteJSON(w, http.StatusAccepted, nil )
 }

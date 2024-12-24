@@ -9,6 +9,7 @@ type Config struct {
 	Port     	string
 	DbConfig 	*DbConfig
 	AuthConfig 	*AuthConfig
+	EmailConfig *EmailConfig
 }
 
 type AuthConfig struct{
@@ -24,11 +25,17 @@ type DbConfig struct {
 	MaxIdleTime  string
 }
 
+type EmailConfig struct{
+	ApiKey 		string
+}
+
+
 func NewConfig() *Config {
 	return &Config{
 		Port:     getEnv("PORT", ":8081"),
 		DbConfig: NewDBConfig(),
 		AuthConfig: NewAuthConfig(),
+		EmailConfig: NewEmailConfig(),
 	}
 }
 
@@ -43,6 +50,12 @@ func NewAuthConfig() *AuthConfig{
 		SecondsLife: getEnvAsInt("REFRESH_TOKEN_LIFE_HOURS", 1440),
 		AccessTokenExpiration: getEnvAsInt("ACCESS_TOKEN_LIFE_SECONDS", 600),
 		JWTSecret: getEnv("JWT_SECRET", "secret"),
+	}
+}
+
+func NewEmailConfig() *EmailConfig{
+	return &EmailConfig{
+		ApiKey: getEnv("EMAIL_API_KEY", ""),
 	}
 }
 

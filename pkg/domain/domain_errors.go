@@ -15,6 +15,9 @@ var (
 	//	PARTICIPATIONS ERRORS
 	ErrNoParticipationFound 		= errors.New("the user isn't a participant of the event")
 
+	// INVITATION ERRORS
+	ErrAlreadyInvited 				= errors.New("user already invited")
+
 	//	EVENTS ERRORS
 	ErrInvalidImage 				= errors.New("invalid image file")
 	ErrEventDoesntExist 			= errors.New("event doesnt exist")

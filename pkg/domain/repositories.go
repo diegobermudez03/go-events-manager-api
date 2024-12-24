@@ -55,6 +55,8 @@ type EventsRepo interface{
 	GetParticipations(ctx context.Context, filters ParticipationFilters) ([]DataModelParticipation, error)
 	GetEventById(ctx context.Context, eventId uuid.UUID)(*Event, error)
 	GetParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID)(*DataModelParticipation, error)
+	CreateInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) error
+	CheckInvitation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) (bool, error)
 }
 
 type FilesRepo interface{

@@ -17,18 +17,24 @@ type EventsService struct{
 	usersRepo 	domain.UsersRepo
 	rolesRepo 	domain.RolesRepo
 	filesRepo 	domain.FilesRepo
+	authRepo 	domain.AuthRepo
+	emailService domain.EmailSvc
 }
 
 func NewEventsService(
 	eventsRepo domain.EventsRepo, 
 	rolesRepo 	domain.RolesRepo,
 	usersRepo 	domain.UsersRepo,
-	filesRepo domain.FilesRepo) domain.EventsSvc{
+	filesRepo domain.FilesRepo,
+	authRepo 	domain.AuthRepo,
+	emailService domain.EmailSvc) domain.EventsSvc{
 	return &EventsService{
 		eventsRepo: eventsRepo,
 		rolesRepo: rolesRepo,
 		usersRepo: usersRepo,
 		filesRepo: filesRepo,
+		authRepo: authRepo,
+		emailService: emailService,
 	}
 }
 
@@ -219,5 +225,34 @@ func (s *EventsService) AddParticipation(ctx context.Context, eventId uuid.UUID,
 	if err := s.eventsRepo.CreateParticipant(ctx, userId, eventId, role.Id); err != nil{
 		return err 
 	}
+	return nil
+}
+
+func (s *EventsService) InviteUser(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) error {
+	// First check if the invitation already exists, in which case, omit everything
+	if exists, _ := s.eventsRepo.CheckInvitation(ctx, eventId, userId); exists{
+		return domain.ErrAlreadyInvited
+	}
+	event, err := s.eventsRepo.GetEventById(ctx, eventId); 
+	if err != nil{
+		return err 
+	}
+
+	userAuth, err := s.authRepo.GetUserAuthById(ctx, userId)
+	if err != nil{
+		return err 
+	}
+
+	if err := s.eventsRepo.CreateInvitation(ctx, eventId, userId); err != nil{
+		return err
+	}
+
+	//send email in background, we hope it reaches the receiver xd, wont wait for confirmation
+	go s.emailService.SendTextEmail(
+		ctx, 
+		userAuth.Email,
+		fmt.Sprintf("You have been invited to %s", event.Name),
+		fmt.Sprintf("You have been invited to event %s which will take place on %s at %v", event.Name, event.Address, event.StartsAt),
+	)
 	return nil
 }

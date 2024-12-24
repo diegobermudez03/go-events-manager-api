@@ -40,6 +40,7 @@ type EventsSvc interface{
 	GetParticipationsOfUser(ctx context.Context, userId uuid.UUID, filters ...ParticipationFilter) ([]Participation, error)
 	GetEvent(ctx context.Context, eventId uuid.UUID)(*EventWithParticipants, error)
 	AddParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID, roleName string) error
+	InviteUser(ctx context.Context, eventId uuid.UUID, userId uuid.UUID) error
 }
 
 type RolesSvc interface{
@@ -49,6 +50,10 @@ type RolesSvc interface{
 
 type InitializeSvc interface {
 	RegisterRoles() error 
+}
+
+type EmailSvc interface{
+	SendTextEmail(ctx context.Context, receiverEmail string, tittle string, bodyText string) error
 }
 
 // REQUEST TYPES 
