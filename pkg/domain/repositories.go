@@ -32,6 +32,7 @@ type AuthRepo interface {
 type UsersRepo interface{
 	CreateUser(ctx context.Context, user User) error
 	GetUserById(ctx context.Context, userId uuid.UUID) (*User, error)
+	GetUsers(ctx context.Context, filters UsersFilters) ([]User, error)
 }
 
 type SessionsRepo interface {

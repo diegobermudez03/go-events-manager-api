@@ -32,6 +32,7 @@ type AuthSvc interface {
 }
 
 type UserSvc interface {
+	GetUsers(ctx context.Context, filters ...UsersFilter) ([]User, error)
 }
 
 type EventsSvc interface{

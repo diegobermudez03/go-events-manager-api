@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/diegobermudez03/go-events-manager-api/pkg/domain"
 	"github.com/google/uuid"
@@ -48,4 +49,31 @@ func (r *UsersPostgres) GetUserById(ctx context.Context, userId uuid.UUID) (*dom
 		return nil, domain.ErrInternal
 	}
 	return user, nil
+}
+
+func (r *UsersPostgres) GetUsers(ctx context.Context, filters domain.UsersFilters) ([]domain.User, error){
+	rows, err := r.db.QueryContext(
+		ctx, 
+		`SELECT id, full_name, birth_date, gender, created_at
+		FROM users
+		WHERE
+		($1::TEXT IS NULL OR (full_name ILIKE ('%' || $1::TEXT || '%') OR gender ILIKE  ('%' || $1::TEXT || '%')))
+		LIMIT $2::INTEGER
+		OFFSET $3::INTEGER`,
+		filters.Text, filters.Limit, filters.Offset,
+	)
+	if err != nil{
+		log.Println(err.Error())
+		return nil, domain.ErrInternal
+	}
+	users := []domain.User{}
+	for rows.Next(){
+		user := domain.User{}
+		if err := rows.Scan(&user.Id, &user.FullName, &user.BirthDate, &user.Gender, &user.CreatedAt); err != nil{
+			log.Println(err.Error())
+			return nil, domain.ErrInternal
+		}
+		users = append(users, user)
+	}
+	return users, nil
 }

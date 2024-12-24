@@ -2,7 +2,7 @@ package domain
 
 import "github.com/google/uuid"
 
-// FILTER OBJECTS
+// PARTICIPATION FILTERS
 type ParticipationFilters struct{
 	UserId 		*uuid.UUID 
 	RoleName 	*string 
@@ -42,3 +42,34 @@ func ParticipationLimitFilter(limit *int) ParticipationFilter{
 		filter.Limit = limit
 	}
 }
+
+
+// USERS FILTERS
+
+type UsersFilters struct{
+	Text 	*string 
+	Offset 	*int 
+	Limit  	*int 
+}
+
+type UsersFilter func(filter *UsersFilters)
+
+func UsersTextFilter(text *string) UsersFilter{
+	return func(filter *UsersFilters){
+		filter.Text = text
+	}
+}
+
+func UsersOffsetFilter(offset *int) UsersFilter{
+	return func(filter *UsersFilters){
+		filter.Offset = offset
+	}
+}
+
+
+func UsersLimitFilter(limit *int) UsersFilter{
+	return func(filter *UsersFilters){
+		filter.Limit = limit
+	}
+}
+

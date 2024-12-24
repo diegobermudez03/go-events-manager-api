@@ -97,6 +97,10 @@ func (u *UsersRepoMock) GetUserById(ctx context.Context, userId uuid.UUID) (*dom
 	return nil, errors.New("")
 }
 
+func (u *UsersRepoMock) GetUsers(ctx context.Context, filters domain.UsersFilters) ([]domain.User, error){
+	return nil, nil
+}
+
 
 ////////////////	SESSIONS REPO
 type SessionRepoMock struct{}

@@ -96,6 +96,10 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 		s.config.AuthConfig.JWTSecret,
 	)
 
+	usersService := app.NewUsersService(
+		s.storage.UsersRepo,
+	)
+
 	eventsService := app.NewEventsService(
 		s.storage.EventsRepo,
 		s.storage.RolesRepo,
@@ -112,10 +116,12 @@ func (s *APIServer) injectDependencies(router *chi.Mux) domain.InitializeSvc{
 	//create handlers
 	authHandler := handlers.NewAuthHandler(authService)
 	eventsHandler := handlers.NewEventsHandler(eventsService, middlerares)
+	usersHandler := handlers.NewUsersHandler(usersService, middlerares)
 
 	//mount routes
 	authHandler.MountRoutes(router)
 	eventsHandler.MountRoutes(router)
+	usersHandler.MountRoutes(router)
 
 	return app.NewInitializeService(s.storage.RolesRepo)
 }
