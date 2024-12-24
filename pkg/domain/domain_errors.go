@@ -17,4 +17,9 @@ var (
 
 	//	EVENTS ERRORS
 	ErrInvalidImage 				= errors.New("invalid image file")
+	ErrEventDoesntExist 			= errors.New("event doesnt exist")
+
+	// ROLES ERRORS
+	ErrRoleDoesntExist 				= errors.New("role doesnt exist")
+
 )

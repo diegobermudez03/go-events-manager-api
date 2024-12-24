@@ -102,7 +102,17 @@ func (r *RolesPostgres) CreatePermissionIfNotExists(ctx context.Context, permiss
 }
 
 func (r *RolesPostgres) GetRoleByName(ctx context.Context, roleName string) (*domain.DataModelRole, error){
-	return nil, nil
+	row := r.db.QueryRowContext(
+		ctx,
+		`SELECT id, name 
+		FROM roles WHERE name = $1`,
+		roleName,
+	)
+	dataModel := new(domain.DataModelRole)
+	if err := row.Scan(&dataModel.Id, &dataModel.Name); err != nil{
+		return nil, err
+	}
+	return dataModel, nil
 }
 
 func (r *RolesPostgres) GetRoleIdByName(ctx context.Context, roleName string) (uuid.UUID, error){

@@ -38,6 +38,9 @@ func (h *EventsHandler) MountRoutes(router *chi.Mux){
 	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionEditEvent)).
 		Get(fmt.Sprintf("/{%s}", eventId), h.GetEvent)
 
+	r.With(h.middlewares.EventAccessMiddleware(domain.PermissionAddParticipant)). 
+		Post(fmt.Sprintf("/{%s}/participants", eventId), h.PostParticipant)
+
 	router.Mount("/events", r)
 }
 
@@ -57,6 +60,11 @@ type createEventDTO struct{
 	StartsAt 	int64 		`json:"startsAt" validate:"required"`
 	EndsAt 		int64 		`json:"endsAt" validate:"required"`
 	Address 	string 		`json:"address" validate:"required"`
+}
+
+type addParticipantDTO struct{
+	UserId 		uuid.UUID	`json:"userId" validate:"required"`
+	Role 		string 		`json:"role" validate:"required"`
 }
 
 //////////	RESPONSE DTOS
@@ -183,15 +191,46 @@ func (h *EventsHandler) GetEventsFromUser(w http.ResponseWriter, r *http.Request
 
 
 func (h *EventsHandler) GetEvent(w http.ResponseWriter, r *http.Request){
-	eventId, ok := r.Context().Value(eventId).(uuid.UUID)
+	reqEventId, ok := r.Context().Value(eventId).(uuid.UUID)
 	if !ok{
 		utils.WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
 		return
 	}
-	event, err := h.eventsService.GetEvent(r.Context(), eventId)
+	event, err := h.eventsService.GetEvent(r.Context(), reqEventId)
 	if err != nil{
 		utils.WriteError(w, http.StatusInternalServerError, err)
 		return 
 	}
 	utils.WriteJSON(w, http.StatusOK, event)
+}
+
+func (h *EventsHandler) PostParticipant(w http.ResponseWriter, r *http.Request){
+	reqEventId, ok := r.Context().Value(eventId).(uuid.UUID)
+	if !ok {
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("internal server error"))
+		return 
+	}
+
+	// extract payload
+	if r.Body == nil{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("no body"))
+		return 
+	}
+	var payload addParticipantDTO
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("invalid body"))
+		return 
+	}
+	if err := utils.Validate.Struct(payload); err != nil{
+		//foundErrors := err.(validator.ValidationErrors)
+		utils.WriteError(w, http.StatusInternalServerError, errors.New("invalid body"))
+		return 
+	}
+
+	//call service
+	if err := h.eventsService.AddParticipation(r.Context(), reqEventId, payload.UserId, payload.Role); err != nil{
+		utils.WriteError(w, http.StatusInternalServerError, err)
+		return 
+	}
+	utils.WriteJSON(w, http.StatusCreated, nil)
 }

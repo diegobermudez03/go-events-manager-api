@@ -198,3 +198,26 @@ func (s *EventsService) GetEvent(ctx context.Context, eventId uuid.UUID)(*domain
 	}
 	return &eventWithParticipants, nil
 }
+
+
+func (s *EventsService) AddParticipation(ctx context.Context, eventId uuid.UUID, userId uuid.UUID, roleName string) error{
+	role, err := s.rolesRepo.GetRoleByName(ctx, roleName)
+	if err != nil{
+		return domain.ErrRoleDoesntExist
+	}
+
+	_, err = s.usersRepo.GetUserById(ctx, userId)
+	if err != nil{
+		return domain.ErrUserDoesntExist
+	}
+
+	_, err = s.eventsRepo.GetEventById(ctx, eventId)
+	if err != nil{
+		return domain.ErrEventDoesntExist
+	}
+
+	if err := s.eventsRepo.CreateParticipant(ctx, userId, eventId, role.Id); err != nil{
+		return err 
+	}
+	return nil
+}
